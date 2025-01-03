@@ -39,3 +39,9 @@ compose.desktop {
         }
     }
 }
+
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-opt-in=kotlin.ExperimentalUnsignedTypes")
+    }
+}

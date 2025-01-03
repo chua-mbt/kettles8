@@ -21,15 +21,11 @@ class Emulator {
 
     private val display: Array<Array<Boolean>> = Array(displayWidth) { Array(displayHeight) { false } }
 
-    private var programCounter: UShort = 0u
-
-    private var indexRegister: UShort = 0u
-
     private val stack: ArrayDeque<UShort> = ArrayDeque(stackSize)
 
+    private var indexRegister: UShort = 0u
     private var delayTimer: UByte = 0u
-
     private var soundTimer: UByte = 0u
 
-    private val registers: ByteArray = ByteArray(VariableRegister.entries.size)
+    private val registers: UByteArray = UByteArray(VariableRegister.entries.size)
 }

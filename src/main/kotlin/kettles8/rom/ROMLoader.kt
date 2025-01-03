@@ -6,7 +6,7 @@ import java.nio.file.Path
 
 class ROMLoader(private val path: Path) {
 
-    suspend fun load(): ByteArray =
-        withContext(Dispatchers.IO) { path.toFile().readBytes() }
+    suspend fun load(): UByteArray =
+        withContext(Dispatchers.IO) { path.toFile().readBytes().toUByteArray() }
 
 }

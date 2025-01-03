@@ -7,7 +7,7 @@ import kotlin.io.path.toPath
 
 class ROMLoaderSuite : FunSpec({
 
-    suspend fun loadResourceROM(romName: String): ByteArray {
+    suspend fun loadResourceROM(romName: String): UByteArray {
         val path = javaClass.classLoader.getResource("kettles8/rom/$romName")!!.toURI().toPath()
         return ROMLoader(path).load()
     }

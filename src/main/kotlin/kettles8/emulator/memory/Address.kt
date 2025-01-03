@@ -9,15 +9,15 @@ package kettles8.emulator.memory
  *  http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#2.1
  */
 object Address {
-    const val RESERVED_START: Int = 0x000
-    const val RESERVED_END: Int = 0x1FF
-    const val FONT_START: Int = 0x050
-    const val FONT_END: Int = 0x09F
-    const val ROM_START: Int = 0x200
-    const val ROM_END: Int = 0xFFF
+    const val RESERVED_START: UShort = 0x000u
+    const val RESERVED_END: UShort = 0x1FFu
+    const val FONT_START: UShort = 0x050u
+    const val FONT_END: UShort = 0x09Fu
+    const val ROM_START: UShort = 0x200u
+    const val ROM_END: UShort = 0xFFFu
 
-    val FONT_BLOCK: IntRange = FONT_START..FONT_END
-    val ROM_BLOCK: IntRange = ROM_START..ROM_END
+    val FONT_BLOCK: IntRange = FONT_START.toInt()..FONT_END.toInt()
+    val ROM_BLOCK: IntRange = ROM_START.toInt()..ROM_END.toInt()
 
     const val FONT_BLOCK_SIZE: Int = 80
     const val ROM_BLOCK_SIZE: Int = 3584
