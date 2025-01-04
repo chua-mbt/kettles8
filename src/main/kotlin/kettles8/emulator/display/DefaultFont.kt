@@ -1,10 +1,12 @@
-package kettles8.emulator
+package kettles8.emulator.display
 
 /**
  * The default font for the Chip-8 emulator. Must be set into 0x050-0x09F in memory.
  * http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#font
  */
 object DefaultFont {
+    const val BYTE_SIZE: UInt = 5u
+
     val representation = ubyteArrayOf(
         0xF0u, 0x90u, 0x90u, 0x90u, 0xF0u, // 0
         0x20u, 0x60u, 0x20u, 0x20u, 0x70u, // 1

@@ -1,4 +1,4 @@
-package kettles8.emulator.interpreter
+package kettles8.emulator.instructions
 
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
