@@ -1,8 +1,10 @@
 package org.akaii.kettles8.emulator.instructions
 
-import org.akaii.kettles8.emulator.Emulator
+import org.akaii.kettles8.emulator.CPU
 import org.akaii.kettles8.emulator.display.DefaultFont
+import org.akaii.kettles8.emulator.display.Display
 import org.akaii.kettles8.emulator.memory.Address
+import org.akaii.kettles8.emulator.memory.Memory
 import org.akaii.kettles8.emulator.memory.Registers.Companion.Register
 
 /**
@@ -95,19 +97,19 @@ interface ByteMask {
 interface Executable {
     fun description(): String = javaClass.simpleName
 
-    fun execute(emulator: Emulator)
+    fun execute(cpu: CPU, memory: Memory, display: Display)
 }
 
 interface NotImplemented : Executable {
-    override fun execute(emulator: Emulator) {
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
         TODO("Not implemented: ${description()}")
     }
 }
 
 /** Clear the display. */
 object CLS : Instruction(0x00E0u) {
-    override fun execute(emulator: Emulator) {
-        emulator.display.clear()
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
+        display.clear()
     }
 }
 
@@ -116,8 +118,8 @@ object CLS : Instruction(0x00E0u) {
  * The interpreter sets the program counter to the address at the top of the stack, then subtracts 1 from the stack pointer.
  */
 object RET : Instruction(0x00EEu) {
-    override fun execute(emulator: Emulator) {
-        emulator.stack.removeLast()
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
+        cpu.stack.removeLast()
     }
 }
 
@@ -132,8 +134,8 @@ class SYS(val value: UShort) : Instruction(value), NotImplemented
  * The interpreter sets the program counter to nnn.
  */
 class JP(val value: UShort) : Instruction(value), AddressMask {
-    override fun execute(emulator: Emulator) {
-        emulator.programCounter = address(value)
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
+        cpu.programCounter = address(value)
     }
 }
 
@@ -142,9 +144,9 @@ class JP(val value: UShort) : Instruction(value), AddressMask {
  * The interpreter increments the stack pointer, then puts the current PC on the top of the stack. The PC is then set to nnn.
  */
 class CALL(val value: UShort) : Instruction(value), AddressMask {
-    override fun execute(emulator: Emulator) {
-        emulator.stack.addLast(emulator.programCounter)
-        emulator.programCounter = address(value)
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
+        cpu.stack.addLast(cpu.programCounter)
+        cpu.programCounter = address(value)
     }
 }
 
@@ -153,9 +155,9 @@ class CALL(val value: UShort) : Instruction(value), AddressMask {
  * The interpreter compares register Vx to kk, and if they are equal, increments the program counter by 2.
  */
 class SE_VX_BYTE(val value: UShort) : Instruction(value), VXMask, ByteMask {
-    override fun execute(emulator: Emulator) {
-        if (emulator.registers[vx(value)] == byteConst(value)) {
-            emulator.programCounter = (emulator.programCounter + INSTRUCTION_SIZE).toUShort()
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
+        if (cpu.registers[vx(value)] == byteConst(value)) {
+            cpu.programCounter = (cpu.programCounter + INSTRUCTION_SIZE).toUShort()
         }
     }
 }
@@ -165,9 +167,9 @@ class SE_VX_BYTE(val value: UShort) : Instruction(value), VXMask, ByteMask {
  * The interpreter compares register Vx to kk, and if they are not equal, increments the program counter by 2.
  */
 class SNE_VX_BYTE(val value: UShort) : Instruction(value), VXMask, ByteMask {
-    override fun execute(emulator: Emulator) {
-        if (emulator.registers[vx(value)] != byteConst(value)) {
-            emulator.programCounter = (emulator.programCounter + INSTRUCTION_SIZE).toUShort()
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
+        if (cpu.registers[vx(value)] != byteConst(value)) {
+            cpu.programCounter = (cpu.programCounter + INSTRUCTION_SIZE).toUShort()
         }
     }
 }
@@ -177,9 +179,9 @@ class SNE_VX_BYTE(val value: UShort) : Instruction(value), VXMask, ByteMask {
  * The interpreter compares register Vx to register Vy, and if they are equal, increments the program counter by 2.
  */
 class SE_VX_VY(val value: UShort) : Instruction(value), VXMask, VYMask {
-    override fun execute(emulator: Emulator) {
-        if (emulator.registers[vx(value)] == emulator.registers[vy(value)]) {
-            emulator.programCounter = (emulator.programCounter + INSTRUCTION_SIZE).toUShort()
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
+        if (cpu.registers[vx(value)] == cpu.registers[vy(value)]) {
+            cpu.programCounter = (cpu.programCounter + INSTRUCTION_SIZE).toUShort()
         }
     }
 }
@@ -189,8 +191,8 @@ class SE_VX_VY(val value: UShort) : Instruction(value), VXMask, VYMask {
  * The interpreter puts the value kk into register Vx.
  */
 class LD_VX_BYTE(val value: UShort) : Instruction(value), VXMask, ByteMask {
-    override fun execute(emulator: Emulator) {
-        emulator.registers[vx(value)] = byteConst(value)
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
+        cpu.registers[vx(value)] = byteConst(value)
     }
 }
 
@@ -199,9 +201,9 @@ class LD_VX_BYTE(val value: UShort) : Instruction(value), VXMask, ByteMask {
  * Adds the value kk to the value of register Vx, then stores the result in Vx.
  */
 class ADD_VX_BYTE(val value: UShort) : Instruction(value), VXMask, ByteMask {
-    override fun execute(emulator: Emulator) {
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
         val vX = vx(value)
-        emulator.registers[vX] = (emulator.registers[vX] + byteConst(value)).toUByte()
+        cpu.registers[vX] = (cpu.registers[vX] + byteConst(value)).toUByte()
     }
 }
 
@@ -210,8 +212,8 @@ class ADD_VX_BYTE(val value: UShort) : Instruction(value), VXMask, ByteMask {
  * Stores the value of register Vy in register Vx.
  */
 class LD_VX_VY(val value: UShort) : Instruction(value), VXMask, VYMask {
-    override fun execute(emulator: Emulator) {
-        emulator.registers[vx(value)] = emulator.registers[vy(value)]
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
+        cpu.registers[vx(value)] = cpu.registers[vy(value)]
     }
 }
 
@@ -222,8 +224,8 @@ class LD_VX_VY(val value: UShort) : Instruction(value), VXMask, VYMask {
  * then the same bit in the result is also 1. Otherwise, it is 0.
  */
 class OR_VX_VY(val value: UShort) : Instruction(value), VXMask, VYMask {
-    override fun execute(emulator: Emulator) {
-        emulator.registers[vx(value)] = emulator.registers[vx(value)] or emulator.registers[vy(value)]
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
+        cpu.registers[vx(value)] = cpu.registers[vx(value)] or cpu.registers[vy(value)]
     }
 }
 
@@ -234,8 +236,8 @@ class OR_VX_VY(val value: UShort) : Instruction(value), VXMask, VYMask {
  * then the same bit in the result is also 1. Otherwise, it is 0.
  */
 class AND_VX_VY(val value: UShort) : Instruction(value), VXMask, VYMask {
-    override fun execute(emulator: Emulator) {
-        emulator.registers[vx(value)] = emulator.registers[vx(value)] and emulator.registers[vy(value)]
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
+        cpu.registers[vx(value)] = cpu.registers[vx(value)] and cpu.registers[vy(value)]
     }
 }
 
@@ -246,8 +248,8 @@ class AND_VX_VY(val value: UShort) : Instruction(value), VXMask, VYMask {
  * the corresponding bit in the result is set to 1. Otherwise, it is 0.
  */
 class XOR_VX_VY(val value: UShort) : Instruction(value), VXMask, VYMask {
-    override fun execute(emulator: Emulator) {
-        emulator.registers[vx(value)] = emulator.registers[vx(value)] xor emulator.registers[vy(value)]
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
+        cpu.registers[vx(value)] = cpu.registers[vx(value)] xor cpu.registers[vy(value)]
     }
 }
 
@@ -257,15 +259,15 @@ class XOR_VX_VY(val value: UShort) : Instruction(value), VXMask, VYMask {
  * Only the lowest 8 bits of the result are kept, and stored in Vx.
  */
 class ADD_VX_VY(val value: UShort) : Instruction(value), VXMask, VYMask {
-    override fun execute(emulator: Emulator) {
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
         val vX = vx(value)
-        val sum = emulator.registers[vX] + emulator.registers[vy(value)]
+        val sum = cpu.registers[vX] + cpu.registers[vy(value)]
         if (sum > 255u) {
-            emulator.registers[Register.VF] = 1u
+            cpu.registers[Register.VF] = 1u
         } else {
-            emulator.registers[Register.VF] = 0u
+            cpu.registers[Register.VF] = 0u
         }
-        emulator.registers[vX] = (sum and 0xFFu).toUByte()
+        cpu.registers[vX] = (sum and 0xFFu).toUByte()
     }
 }
 
@@ -274,15 +276,15 @@ class ADD_VX_VY(val value: UShort) : Instruction(value), VXMask, VYMask {
  * If Vx > Vy, then VF is set to 1, otherwise 0. Then Vy is subtracted from Vx, and the results stored in Vx.
  */
 class SUB_VX_VY(val value: UShort) : Instruction(value), VXMask, VYMask {
-    override fun execute(emulator: Emulator) {
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
         val vX = vx(value)
         val vY = vy(value)
-        if (emulator.registers[vX] > emulator.registers[vY]) {
-            emulator.registers[Register.VF] = 1u
+        if (cpu.registers[vX] > cpu.registers[vY]) {
+            cpu.registers[Register.VF] = 1u
         } else {
-            emulator.registers[Register.VF] = 0u
+            cpu.registers[Register.VF] = 0u
         }
-        emulator.registers[vX] = (emulator.registers[vX] - emulator.registers[vY]).toUByte()
+        cpu.registers[vX] = (cpu.registers[vX] - cpu.registers[vY]).toUByte()
     }
 }
 
@@ -291,10 +293,10 @@ class SUB_VX_VY(val value: UShort) : Instruction(value), VXMask, VYMask {
  * If the least-significant bit of Vx is 1, then VF is set to 1, otherwise 0. Then Vx is divided by 2.
  */
 class SHR_VX(val value: UShort) : Instruction(value), VXMask {
-    override fun execute(emulator: Emulator) {
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
         val vX = vx(value)
-        emulator.registers[Register.VF] = (emulator.registers[vX] and 0x1u)
-        emulator.registers[vX] = (emulator.registers[vX].toUInt() shr 1).toUByte()
+        cpu.registers[Register.VF] = (cpu.registers[vX] and 0x1u)
+        cpu.registers[vX] = (cpu.registers[vX].toUInt() shr 1).toUByte()
     }
 }
 
@@ -303,15 +305,15 @@ class SHR_VX(val value: UShort) : Instruction(value), VXMask {
  * If Vy > Vx, then VF is set to 1, otherwise 0. Then Vx is subtracted from Vy, and the results stored in Vx.
  */
 class SUBN_VX_VY(val value: UShort) : Instruction(value), VXMask, VYMask {
-    override fun execute(emulator: Emulator) {
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
         val vX = vx(value)
         val vY = vy(value)
-        if (emulator.registers[vY] > emulator.registers[vX]) {
-            emulator.registers[Register.VF] = 1u
+        if (cpu.registers[vY] > cpu.registers[vX]) {
+            cpu.registers[Register.VF] = 1u
         } else {
-            emulator.registers[Register.VF] = 0u
+            cpu.registers[Register.VF] = 0u
         }
-        emulator.registers[vX] = (emulator.registers[vY] - emulator.registers[vX]).toUByte()
+        cpu.registers[vX] = (cpu.registers[vY] - cpu.registers[vX]).toUByte()
     }
 }
 
@@ -320,11 +322,11 @@ class SUBN_VX_VY(val value: UShort) : Instruction(value), VXMask, VYMask {
  * If the most-significant bit of Vx is 1, then VF is set to 1, otherwise to 0. Then Vx is multiplied by 2.
  */
 class SHL_VX(val value: UShort) : Instruction(value), VXMask {
-    override fun execute(emulator: Emulator) {
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
         val vX = vx(value)
-        val carry = (emulator.registers[vX] and 0x80u).toUInt() shr 7
-        emulator.registers[Register.VF] = carry.toUByte()
-        emulator.registers[vX] = (emulator.registers[vX].toUInt() shl 1).toUByte()
+        val carry = (cpu.registers[vX] and 0x80u).toUInt() shr 7
+        cpu.registers[Register.VF] = carry.toUByte()
+        cpu.registers[vX] = (cpu.registers[vX].toUInt() shl 1).toUByte()
     }
 }
 
@@ -333,9 +335,9 @@ class SHL_VX(val value: UShort) : Instruction(value), VXMask {
  * The values of Vx and Vy are compared, and if they are not equal, the program counter is increased by 2.
  */
 class SNE_VX_VY(val value: UShort) : Instruction(value), VXMask, VYMask {
-    override fun execute(emulator: Emulator) {
-        if (emulator.registers[vx(value)] != emulator.registers[vy(value)]) {
-            emulator.programCounter = (emulator.programCounter + INSTRUCTION_SIZE).toUShort()
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
+        if (cpu.registers[vx(value)] != cpu.registers[vy(value)]) {
+            cpu.programCounter = (cpu.programCounter + INSTRUCTION_SIZE).toUShort()
         }
     }
 }
@@ -345,8 +347,8 @@ class SNE_VX_VY(val value: UShort) : Instruction(value), VXMask, VYMask {
  * The value of register I is set to nnn.
  */
 class LD_I(val value: UShort) : Instruction(value), AddressMask {
-    override fun execute(emulator: Emulator) {
-        emulator.indexRegister = address(value)
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
+        cpu.indexRegister = address(value)
     }
 }
 
@@ -355,8 +357,8 @@ class LD_I(val value: UShort) : Instruction(value), AddressMask {
  * The program counter is set to nnn plus the value of V0.
  */
 class JP_V0(val value: UShort) : Instruction(value), AddressMask {
-    override fun execute(emulator: Emulator) {
-        emulator.programCounter = (address(value) + emulator.registers[Register.V0]).toUShort()
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
+        cpu.programCounter = (address(value) + cpu.registers[Register.V0]).toUShort()
     }
 }
 
@@ -368,8 +370,8 @@ class JP_V0(val value: UShort) : Instruction(value), AddressMask {
 class RND_VX(val value: UShort) : Instruction(value), VXMask, ByteMask {
     val randomRange = 0..255
 
-    override fun execute(emulator: Emulator) {
-        emulator.registers[vx(value)] = (byteConst(value) and randomRange.random().toUByte())
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
+        cpu.registers[vx(value)] = (byteConst(value) and randomRange.random().toUByte())
     }
 }
 
@@ -400,8 +402,8 @@ class SKNP_VX(val value: UShort) : Instruction(value), NotImplemented
  * The value of DT is placed into Vx.
  */
 class LD_VX_DT(val value: UShort) : Instruction(value), VXMask {
-    override fun execute(emulator: Emulator) {
-        emulator.registers[vx(value)] = emulator.delayTimer
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
+        cpu.registers[vx(value)] = cpu.delayTimer
     }
 }
 
@@ -416,8 +418,8 @@ class LD_VX_K(val value: UShort) : Instruction(value), NotImplemented
  * DT is set equal to the value of Vx.
  */
 class LD_DT_VX(val value: UShort) : Instruction(value), VXMask {
-    override fun execute(emulator: Emulator) {
-        emulator.delayTimer = emulator.registers[vx(value)]
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
+        cpu.delayTimer = cpu.registers[vx(value)]
     }
 }
 
@@ -426,8 +428,8 @@ class LD_DT_VX(val value: UShort) : Instruction(value), VXMask {
  * ST is set equal to the value of Vx.
  */
 class LD_ST_VX(val value: UShort) : Instruction(value), VXMask {
-    override fun execute(emulator: Emulator) {
-        emulator.soundTimer = emulator.registers[vx(value)]
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
+        cpu.soundTimer = cpu.registers[vx(value)]
     }
 }
 
@@ -436,8 +438,8 @@ class LD_ST_VX(val value: UShort) : Instruction(value), VXMask {
  * The values of I and Vx are added, and the results are stored in location I.
  */
 class ADD_I_VX(val value: UShort) : Instruction(value), VXMask {
-    override fun execute(emulator: Emulator) {
-        emulator.indexRegister = (emulator.indexRegister + emulator.registers[vx(value)]).toUShort()
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
+        cpu.indexRegister = (cpu.indexRegister + cpu.registers[vx(value)]).toUShort()
     }
 }
 
@@ -446,8 +448,8 @@ class ADD_I_VX(val value: UShort) : Instruction(value), VXMask {
  * The value of I is set to the location for the hexadecimal sprite corresponding to the value of Vx.
  */
 class LD_F_VX(val value: UShort) : Instruction(value), VXMask {
-    override fun execute(emulator: Emulator) {
-        emulator.indexRegister = (Address.FONT_START + emulator.registers[vx(value)] * DefaultFont.BYTE_SIZE).toUShort()
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
+        cpu.indexRegister = (Address.FONT_START + cpu.registers[vx(value)] * DefaultFont.BYTE_SIZE).toUShort()
     }
 }
 
@@ -457,11 +459,11 @@ class LD_F_VX(val value: UShort) : Instruction(value), VXMask {
  * the tens digit at location I+1, and the ones digit at location I+2.
  */
 class LD_B_VX(val value: UShort) : Instruction(value), VXMask {
-    override fun execute(emulator: Emulator) {
-        val vxContents = emulator.registers[vx(value)]
-        emulator.memory[(emulator.indexRegister + 2u).toUByte()] = (vxContents.mod(10u)).toUByte()
-        emulator.memory[(emulator.indexRegister + 1u).toUByte()] = (vxContents.div(10u).mod(10u)).toUByte()
-        emulator.memory[(emulator.indexRegister).toUByte()] = (vxContents.div(100u).mod(10u)).toUByte()
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
+        val vxContents = cpu.registers[vx(value)]
+        memory[(cpu.indexRegister + 2u).toUByte()] = (vxContents.mod(10u)).toUByte()
+        memory[(cpu.indexRegister + 1u).toUByte()] = (vxContents.div(10u).mod(10u)).toUByte()
+        memory[(cpu.indexRegister).toUByte()] = (vxContents.div(100u).mod(10u)).toUByte()
     }
 }
 
@@ -470,12 +472,12 @@ class LD_B_VX(val value: UShort) : Instruction(value), VXMask {
  * The interpreter copies the values of registers V0 through Vx into memory, starting at the address in location I.
  */
 class LD_I_VX(val value: UShort) : Instruction(value), VXMask {
-    override fun execute(emulator: Emulator) {
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
         val vX = vx(value)
         val registersToVX = Register.V0..vX
         for (register in registersToVX) {
-            val memoryAddress = emulator.indexRegister + register.value.toUShort()
-            emulator.memory[memoryAddress.toUByte()] = emulator.registers[register]
+            val memoryAddress = cpu.indexRegister + register.value.toUShort()
+            memory[memoryAddress.toUByte()] = cpu.registers[register]
         }
     }
 }
@@ -485,12 +487,12 @@ class LD_I_VX(val value: UShort) : Instruction(value), VXMask {
  * The interpreter reads values from memory starting at location I into registers V0 through Vx.
  */
 class LD_VX_I(val value: UShort) : Instruction(value), VXMask {
-    override fun execute(emulator: Emulator) {
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
         val vX = vx(value)
         val registersToVX = Register.V0..vX
         for (register in registersToVX) {
-            val memoryAddress = emulator.indexRegister + register.value.toUShort()
-            emulator.registers[register] = emulator.memory[memoryAddress.toUByte()]
+            val memoryAddress = cpu.indexRegister + register.value.toUShort()
+            cpu.registers[register] = memory[memoryAddress.toUByte()]
         }
     }
 }

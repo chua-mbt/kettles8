@@ -17,7 +17,7 @@ class InstructionSuite : FunSpec({
         emulator.display.fill()
         emulator.display.flattened().shouldContainOnly(true)
 
-        instruction.execute(emulator)
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
         emulator.display.flattened().shouldContainOnly(false)
     }
 
@@ -26,11 +26,11 @@ class InstructionSuite : FunSpec({
         instruction shouldBe RET
 
         val emulator = Emulator()
-        emulator.stack.addLast(0x0200u)
-        emulator.stack.shouldNotBeEmpty()
+        emulator.cpu.stack.addLast(0x0200u)
+        emulator.cpu.stack.shouldNotBeEmpty()
 
-        instruction.execute(emulator)
-        emulator.stack.shouldBeEmpty()
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.stack.shouldBeEmpty()
     }
 
     test("JP") {
@@ -40,10 +40,10 @@ class InstructionSuite : FunSpec({
         instruction.address(instruction.value) shouldBe expectedAddress
 
         val emulator = Emulator()
-        emulator.programCounter shouldNotBe expectedAddress
+        emulator.cpu.programCounter shouldNotBe expectedAddress
 
-        instruction.execute(emulator)
-        emulator.programCounter shouldBe expectedAddress
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.programCounter shouldBe expectedAddress
     }
 
     test("CALL") {
@@ -54,14 +54,14 @@ class InstructionSuite : FunSpec({
 
         val emulator = Emulator()
         val originalAddress: UShort = 0x0002u
-        emulator.programCounter = originalAddress
-        emulator.stack.shouldBeEmpty()
-        emulator.programCounter shouldNotBe expectedAddress
+        emulator.cpu.programCounter = originalAddress
+        emulator.cpu.stack.shouldBeEmpty()
+        emulator.cpu.programCounter shouldNotBe expectedAddress
 
-        instruction.execute(emulator)
-        emulator.programCounter shouldBe expectedAddress
-        emulator.stack.shouldContain(originalAddress)
-        emulator.stack.size shouldBe 1
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.programCounter shouldBe expectedAddress
+        emulator.cpu.stack.shouldContain(originalAddress)
+        emulator.cpu.stack.size shouldBe 1
     }
 
     test("SE_VX_BYTE") {
@@ -71,15 +71,15 @@ class InstructionSuite : FunSpec({
         instruction.byteConst(instruction.value) shouldBe 0x21u
 
         val emulator = Emulator()
-        emulator.registers[VA] = 0x20u
-        emulator.programCounter = 0x0002u
-        instruction.execute(emulator)
-        emulator.programCounter shouldBe 0x0002u // No skip
+        emulator.cpu.registers[VA] = 0x20u
+        emulator.cpu.programCounter = 0x0002u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.programCounter shouldBe 0x0002u // No skip
 
-        emulator.registers[VA] = 0x21u
-        emulator.programCounter = 0x0002u
-        instruction.execute(emulator)
-        emulator.programCounter shouldBe 0x0004u // Skip the next instruction
+        emulator.cpu.registers[VA] = 0x21u
+        emulator.cpu.programCounter = 0x0002u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.programCounter shouldBe 0x0004u // Skip the next instruction
     }
 
     test("SNE_VX_BYTE") {
@@ -89,15 +89,15 @@ class InstructionSuite : FunSpec({
         instruction.byteConst(instruction.value) shouldBe 0x21u
 
         val emulator = Emulator()
-        emulator.registers[VA] = 0x21u
-        emulator.programCounter = 0x0002u
-        instruction.execute(emulator)
-        emulator.programCounter shouldBe 0x0002u // No skip
+        emulator.cpu.registers[VA] = 0x21u
+        emulator.cpu.programCounter = 0x0002u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.programCounter shouldBe 0x0002u // No skip
 
-        emulator.registers[VA] = 0x20u
-        emulator.programCounter = 0x0002u
-        instruction.execute(emulator)
-        emulator.programCounter shouldBe 0x0004u // Skip the next instruction
+        emulator.cpu.registers[VA] = 0x20u
+        emulator.cpu.programCounter = 0x0002u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.programCounter shouldBe 0x0004u // Skip the next instruction
     }
 
     test("SE_VX_VY") {
@@ -107,17 +107,17 @@ class InstructionSuite : FunSpec({
         instruction.vy(instruction.value) shouldBe VB
 
         val emulator = Emulator()
-        emulator.registers[VA] = 0x20u
-        emulator.registers[VB] = 0x20u
-        emulator.programCounter = 0x0002u
-        instruction.execute(emulator)
-        emulator.programCounter shouldBe 0x0004u // Skip the next instruction
+        emulator.cpu.registers[VA] = 0x20u
+        emulator.cpu.registers[VB] = 0x20u
+        emulator.cpu.programCounter = 0x0002u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.programCounter shouldBe 0x0004u // Skip the next instruction
 
-        emulator.registers[VA] = 0x20u
-        emulator.registers[VB] = 0x21u
-        emulator.programCounter = 0x0002u
-        instruction.execute(emulator)
-        emulator.programCounter shouldBe 0x0002u // No skip
+        emulator.cpu.registers[VA] = 0x20u
+        emulator.cpu.registers[VB] = 0x21u
+        emulator.cpu.programCounter = 0x0002u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.programCounter shouldBe 0x0002u // No skip
     }
 
     test("LD_VX_BYTE") {
@@ -127,9 +127,9 @@ class InstructionSuite : FunSpec({
         instruction.byteConst(instruction.value) shouldBe 0x21u
 
         val emulator = Emulator()
-        emulator.registers[VA] shouldBe 0x00u
-        instruction.execute(emulator)
-        emulator.registers[VA] shouldBe 0x21u
+        emulator.cpu.registers[VA] shouldBe 0x00u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.registers[VA] shouldBe 0x21u
     }
 
     test("ADD_VX_BYTE") {
@@ -139,12 +139,12 @@ class InstructionSuite : FunSpec({
         instruction.byteConst(instruction.value) shouldBe 0x21u
 
         val emulator = Emulator()
-        emulator.registers[VA] shouldBe 0x00u
-        instruction.execute(emulator)
-        emulator.registers[VA] shouldBe 0x21u
+        emulator.cpu.registers[VA] shouldBe 0x00u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.registers[VA] shouldBe 0x21u
 
-        instruction.execute(emulator)
-        emulator.registers[VA] shouldBe 0x42u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.registers[VA] shouldBe 0x42u
     }
 
     test("LD_VX_VY") {
@@ -154,10 +154,10 @@ class InstructionSuite : FunSpec({
         instruction.vy(instruction.value) shouldBe VB
 
         val emulator = Emulator()
-        emulator.registers[VA] shouldBe 0x00u
-        emulator.registers[VB] = 0x21u
-        instruction.execute(emulator)
-        emulator.registers[VA] shouldBe 0x21u
+        emulator.cpu.registers[VA] shouldBe 0x00u
+        emulator.cpu.registers[VB] = 0x21u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.registers[VA] shouldBe 0x21u
     }
 
     test("OR_VX_VY") {
@@ -167,10 +167,10 @@ class InstructionSuite : FunSpec({
         instruction.vy(instruction.value) shouldBe VB
 
         val emulator = Emulator()
-        emulator.registers[VA] = 0b1010u
-        emulator.registers[VB] = 0b1100u
-        instruction.execute(emulator)
-        emulator.registers[VA] shouldBe 0b1110u
+        emulator.cpu.registers[VA] = 0b1010u
+        emulator.cpu.registers[VB] = 0b1100u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.registers[VA] shouldBe 0b1110u
     }
 
     test("AND_VX_VY") {
@@ -180,10 +180,10 @@ class InstructionSuite : FunSpec({
         instruction.vy(instruction.value) shouldBe VB
 
         val emulator = Emulator()
-        emulator.registers[VA] = 0b1010u
-        emulator.registers[VB] = 0b1100u
-        instruction.execute(emulator)
-        emulator.registers[VA] shouldBe 0b1000u
+        emulator.cpu.registers[VA] = 0b1010u
+        emulator.cpu.registers[VB] = 0b1100u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.registers[VA] shouldBe 0b1000u
     }
 
     test("XOR_VX_VY") {
@@ -193,10 +193,10 @@ class InstructionSuite : FunSpec({
         instruction.vy(instruction.value) shouldBe VB
 
         val emulator = Emulator()
-        emulator.registers[VA] = 0b1010u
-        emulator.registers[VB] = 0b1100u
-        instruction.execute(emulator)
-        emulator.registers[VA] shouldBe 0b0110u
+        emulator.cpu.registers[VA] = 0b1010u
+        emulator.cpu.registers[VB] = 0b1100u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.registers[VA] shouldBe 0b0110u
     }
 
     test("ADD_VX_VY") {
@@ -206,17 +206,17 @@ class InstructionSuite : FunSpec({
         instruction.vy(instruction.value) shouldBe VB
 
         val emulator = Emulator()
-        emulator.registers[VA] = 0xFFu
-        emulator.registers[VB] = 0x01u
-        instruction.execute(emulator)
-        emulator.registers[VA] shouldBe 0x00u
-        emulator.registers[VF] shouldBe 0x01u // Overflow
+        emulator.cpu.registers[VA] = 0xFFu
+        emulator.cpu.registers[VB] = 0x01u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.registers[VA] shouldBe 0x00u
+        emulator.cpu.registers[VF] shouldBe 0x01u // Overflow
 
-        emulator.registers[VA] = 0x01u
-        emulator.registers[VB] = 0x01u
-        instruction.execute(emulator)
-        emulator.registers[VA] shouldBe 0x02u
-        emulator.registers[VF] shouldBe 0x00u // No overflow
+        emulator.cpu.registers[VA] = 0x01u
+        emulator.cpu.registers[VB] = 0x01u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.registers[VA] shouldBe 0x02u
+        emulator.cpu.registers[VF] shouldBe 0x00u // No overflow
     }
 
     test("SUB_VX_VY") {
@@ -226,17 +226,17 @@ class InstructionSuite : FunSpec({
         instruction.vy(instruction.value) shouldBe VB
 
         val emulator = Emulator()
-        emulator.registers[VA] = 0x02u
-        emulator.registers[VB] = 0x01u
-        instruction.execute(emulator)
-        emulator.registers[VA] shouldBe 0x01u
-        emulator.registers[VF] shouldBe 0x01u // Borrow
+        emulator.cpu.registers[VA] = 0x02u
+        emulator.cpu.registers[VB] = 0x01u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.registers[VA] shouldBe 0x01u
+        emulator.cpu.registers[VF] shouldBe 0x01u // Borrow
 
-        emulator.registers[VA] = 0x01u
-        emulator.registers[VB] = 0x02u
-        instruction.execute(emulator)
-        emulator.registers[VA] shouldBe 0xFFu
-        emulator.registers[VF] shouldBe 0x00u // No borrow
+        emulator.cpu.registers[VA] = 0x01u
+        emulator.cpu.registers[VB] = 0x02u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.registers[VA] shouldBe 0xFFu
+        emulator.cpu.registers[VF] shouldBe 0x00u // No borrow
     }
 
     test("SHR_VX") {
@@ -245,15 +245,15 @@ class InstructionSuite : FunSpec({
         instruction.vx(instruction.value) shouldBe VA
 
         val emulator = Emulator()
-        emulator.registers[VA] = 0b1010u
-        instruction.execute(emulator)
-        emulator.registers[VA] shouldBe 0b0101u
-        emulator.registers[VF] shouldBe 0u // No carry from LSB
+        emulator.cpu.registers[VA] = 0b1010u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.registers[VA] shouldBe 0b0101u
+        emulator.cpu.registers[VF] shouldBe 0u // No carry from LSB
 
-        emulator.registers[VA] = 0b0101u
-        instruction.execute(emulator)
-        emulator.registers[VA] shouldBe 0b0010u
-        emulator.registers[VF] shouldBe 1u // Carry from LSB
+        emulator.cpu.registers[VA] = 0b0101u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.registers[VA] shouldBe 0b0010u
+        emulator.cpu.registers[VF] shouldBe 1u // Carry from LSB
     }
 
     test("SUBN_VX_VY") {
@@ -263,17 +263,17 @@ class InstructionSuite : FunSpec({
         instruction.vy(instruction.value) shouldBe VB
 
         val emulator = Emulator()
-        emulator.registers[VA] = 0x01u
-        emulator.registers[VB] = 0x02u
-        instruction.execute(emulator)
-        emulator.registers[VA] shouldBe 0x01u
-        emulator.registers[VF] shouldBe 0x01u // Borrow
+        emulator.cpu.registers[VA] = 0x01u
+        emulator.cpu.registers[VB] = 0x02u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.registers[VA] shouldBe 0x01u
+        emulator.cpu.registers[VF] shouldBe 0x01u // Borrow
 
-        emulator.registers[VA] = 0x02u
-        emulator.registers[VB] = 0x01u
-        instruction.execute(emulator)
-        emulator.registers[VA] shouldBe 0xFFu
-        emulator.registers[VF] shouldBe 0x00u // No borrow
+        emulator.cpu.registers[VA] = 0x02u
+        emulator.cpu.registers[VB] = 0x01u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.registers[VA] shouldBe 0xFFu
+        emulator.cpu.registers[VF] shouldBe 0x00u // No borrow
     }
 
     test("SHL_VX") {
@@ -282,15 +282,15 @@ class InstructionSuite : FunSpec({
         instruction.vx(instruction.value) shouldBe VA
 
         val emulator = Emulator()
-        emulator.registers[VA] = 0b01010000u
-        instruction.execute(emulator)
-        emulator.registers[VA] shouldBe 0b10100000u
-        emulator.registers[VF] shouldBe 0u // No carry from MSB
+        emulator.cpu.registers[VA] = 0b01010000u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.registers[VA] shouldBe 0b10100000u
+        emulator.cpu.registers[VF] shouldBe 0u // No carry from MSB
 
-        emulator.registers[VA] = 0b10100000u
-        instruction.execute(emulator)
-        emulator.registers[VA] shouldBe 0b01000000u
-        emulator.registers[VF] shouldBe 1u // Carry from MSB
+        emulator.cpu.registers[VA] = 0b10100000u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.registers[VA] shouldBe 0b01000000u
+        emulator.cpu.registers[VF] shouldBe 1u // Carry from MSB
     }
 
     test("SNE_VX_VY") {
@@ -300,17 +300,17 @@ class InstructionSuite : FunSpec({
         instruction.vy(instruction.value) shouldBe VB
 
         val emulator = Emulator()
-        emulator.registers[VA] = 0x20u
-        emulator.registers[VB] = 0x20u
-        emulator.programCounter = 0x0002u
-        instruction.execute(emulator)
-        emulator.programCounter shouldBe 0x0002u // No skip
+        emulator.cpu.registers[VA] = 0x20u
+        emulator.cpu.registers[VB] = 0x20u
+        emulator.cpu.programCounter = 0x0002u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.programCounter shouldBe 0x0002u // No skip
 
-        emulator.registers[VA] = 0x20u
-        emulator.registers[VB] = 0x21u
-        emulator.programCounter = 0x0002u
-        instruction.execute(emulator)
-        emulator.programCounter shouldBe 0x0004u // Skip the next instruction
+        emulator.cpu.registers[VA] = 0x20u
+        emulator.cpu.registers[VB] = 0x21u
+        emulator.cpu.programCounter = 0x0002u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.programCounter shouldBe 0x0004u // Skip the next instruction
     }
 
     test("LD_I") {
@@ -319,9 +319,9 @@ class InstructionSuite : FunSpec({
         instruction.address(instruction.value) shouldBe 0xBCDu
 
         val emulator = Emulator()
-        emulator.indexRegister shouldBe 0x0000u
-        instruction.execute(emulator)
-        emulator.indexRegister shouldBe 0x0BCDu
+        emulator.cpu.indexRegister shouldBe 0x0000u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.indexRegister shouldBe 0x0BCDu
     }
 
     test("JP_V0") {
@@ -330,10 +330,10 @@ class InstructionSuite : FunSpec({
         instruction.address(instruction.value) shouldBe 0x0BCDu
 
         val emulator = Emulator()
-        emulator.registers[V0] = 0x01u
-        emulator.programCounter shouldBe 0x0000u
-        instruction.execute(emulator)
-        emulator.programCounter shouldBe 0x0BCEu // 0xBCDu + 0x001u
+        emulator.cpu.registers[V0] = 0x01u
+        emulator.cpu.programCounter shouldBe 0x0000u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.programCounter shouldBe 0x0BCEu // 0xBCDu + 0x001u
     }
 
     test("RND_VX") {
@@ -343,9 +343,9 @@ class InstructionSuite : FunSpec({
         instruction.byteConst(instruction.value) shouldBe 0xBCu
 
         val emulator = Emulator()
-        emulator.registers[VA] shouldBe 0x00u
-        instruction.execute(emulator)
-        emulator.registers[VA] shouldNotBe 0x00u
+        emulator.cpu.registers[VA] shouldBe 0x00u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.registers[VA] shouldNotBe 0x00u
         // TODO: Properly test randomness?
     }
 
@@ -367,10 +367,10 @@ class InstructionSuite : FunSpec({
         instruction.vx(instruction.value) shouldBe VA
 
         val emulator = Emulator()
-        emulator.registers[VA] shouldBe 0x00u
-        emulator.delayTimer = 0x21u
-        instruction.execute(emulator)
-        emulator.registers[VA] shouldBe 0x21u
+        emulator.cpu.registers[VA] shouldBe 0x00u
+        emulator.cpu.delayTimer = 0x21u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.registers[VA] shouldBe 0x21u
     }
 
     test("LD_VX_K") {
@@ -383,10 +383,10 @@ class InstructionSuite : FunSpec({
         instruction.vx(instruction.value) shouldBe VA
 
         val emulator = Emulator()
-        emulator.registers[VA] = 0x21u
-        emulator.delayTimer shouldBe 0x00u
-        instruction.execute(emulator)
-        emulator.delayTimer shouldBe 0x21u
+        emulator.cpu.registers[VA] = 0x21u
+        emulator.cpu.delayTimer shouldBe 0x00u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.delayTimer shouldBe 0x21u
     }
 
     test("LD_ST_VX") {
@@ -395,10 +395,10 @@ class InstructionSuite : FunSpec({
         instruction.vx(instruction.value) shouldBe VA
 
         val emulator = Emulator()
-        emulator.registers[VA] = 0x21u
-        emulator.soundTimer shouldBe 0x00u
-        instruction.execute(emulator)
-        emulator.soundTimer shouldBe 0x21u
+        emulator.cpu.registers[VA] = 0x21u
+        emulator.cpu.soundTimer shouldBe 0x00u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.soundTimer shouldBe 0x21u
     }
 
     test("ADD_I_VX") {
@@ -407,10 +407,10 @@ class InstructionSuite : FunSpec({
         instruction.vx(instruction.value) shouldBe VA
 
         val emulator = Emulator()
-        emulator.registers[VA] = 0x21u
-        emulator.indexRegister = 0x21u
-        instruction.execute(emulator)
-        emulator.indexRegister shouldBe 0x42u
+        emulator.cpu.registers[VA] = 0x21u
+        emulator.cpu.indexRegister = 0x21u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.indexRegister shouldBe 0x42u
     }
 
     test("LD_F_VX") {
@@ -419,11 +419,11 @@ class InstructionSuite : FunSpec({
         instruction.vx(instruction.value) shouldBe VA
 
         val emulator = Emulator()
-        emulator.registers[VA] = 0x02u
-        emulator.indexRegister shouldBe 0x0000u
-        instruction.execute(emulator)
+        emulator.cpu.registers[VA] = 0x02u
+        emulator.cpu.indexRegister shouldBe 0x0000u
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
         val expectedFontAddress = Address.FONT_START + 0x000Au // 2x5 = 10
-        emulator.indexRegister shouldBe expectedFontAddress.toUShort()
+        emulator.cpu.indexRegister shouldBe expectedFontAddress.toUShort()
     }
 
     test("LD_B_VX") {
@@ -432,9 +432,9 @@ class InstructionSuite : FunSpec({
         instruction.vx(instruction.value) shouldBe VA
 
         val emulator = Emulator()
-        emulator.registers[VA] = 123u
-        emulator.indexRegister = 0x000Au
-        instruction.execute(emulator)
+        emulator.cpu.registers[VA] = 123u
+        emulator.cpu.indexRegister = 0x000Au
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
         emulator.memory[10u.toUByte()] shouldBe 1u
         emulator.memory[11u.toUByte()] shouldBe 2u
         emulator.memory[12u.toUByte()] shouldBe 3u
@@ -447,12 +447,12 @@ class InstructionSuite : FunSpec({
 
         val emulator = Emulator()
         for (vx in V0..VA) {
-            emulator.registers[vx] = vx.value.toUByte()
+            emulator.cpu.registers[vx] = vx.value.toUByte()
         }
-        emulator.indexRegister = 0x000Au
+        emulator.cpu.indexRegister = 0x000Au
         emulator.memory.slice(10..25) shouldContainOnly (listOf(0u))
-        instruction.execute(emulator)
-        emulator.memory.slice(10..25) shouldBe emulator.registers.toList().toUByteArray()
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.memory.slice(10..25) shouldBe emulator.cpu.registers.toList().toUByteArray()
     }
 
     test("LD_VX_I") {
@@ -464,10 +464,10 @@ class InstructionSuite : FunSpec({
         for (vx in V0..VA) {
             emulator.memory[(10 + vx.value).toUByte()] = vx.value.toUByte()
         }
-        emulator.indexRegister = 0x000Au
-        emulator.registers.toList() shouldContainOnly (listOf(0u))
-        instruction.execute(emulator)
-        emulator.registers.toList().toUByteArray() shouldBe emulator.memory.slice(10..25)
+        emulator.cpu.indexRegister = 0x000Au
+        emulator.cpu.registers.toList() shouldContainOnly (listOf(0u))
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+        emulator.cpu.registers.toList().toUByteArray() shouldBe emulator.memory.slice(10..25)
     }
 
 })
