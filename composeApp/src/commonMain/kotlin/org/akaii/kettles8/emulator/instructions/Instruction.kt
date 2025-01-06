@@ -218,7 +218,7 @@ class LD_VX_VY(val value: UShort) : Instruction(value), VXMask, VYMask {
 /**
  * Set Vx = Vx OR Vy.
  * Performs a bitwise OR on the values of Vx and Vy, then stores the result in Vx.
- * A bitwise OR compares the corrseponding bits from two values, and if either bit is 1,
+ * A bitwise OR compares the corresponding bits from two values, and if either bit is 1,
  * then the same bit in the result is also 1. Otherwise, it is 0.
  */
 class OR_VX_VY(val value: UShort) : Instruction(value), VXMask, VYMask {
@@ -456,16 +456,41 @@ class LD_F_VX(val value: UShort) : Instruction(value), VXMask {
  * The interpreter takes the decimal value of Vx, and places the hundreds digit in memory at location in I,
  * the tens digit at location I+1, and the ones digit at location I+2.
  */
-class LD_B_VX(val value: UShort) : Instruction(value), NotImplemented
+class LD_B_VX(val value: UShort) : Instruction(value), VXMask {
+    override fun execute(emulator: Emulator) {
+        val vxContents = emulator.registers[vx(value)]
+        emulator.memory[(emulator.indexRegister + 2u).toUByte()] = (vxContents.mod(10u)).toUByte()
+        emulator.memory[(emulator.indexRegister + 1u).toUByte()] = (vxContents.div(10u).mod(10u)).toUByte()
+        emulator.memory[(emulator.indexRegister).toUByte()] = (vxContents.div(100u).mod(10u)).toUByte()
+    }
+}
 
 /**
  * Store registers V0 through Vx in memory starting at location I.
  * The interpreter copies the values of registers V0 through Vx into memory, starting at the address in location I.
  */
-class LD_I_VX(val value: UShort) : Instruction(value), NotImplemented
+class LD_I_VX(val value: UShort) : Instruction(value), VXMask {
+    override fun execute(emulator: Emulator) {
+        val vX = vx(value)
+        val registersToVX = Register.V0..vX
+        for (register in registersToVX) {
+            val memoryAddress = emulator.indexRegister + register.value.toUShort()
+            emulator.memory[memoryAddress.toUByte()] = emulator.registers[register]
+        }
+    }
+}
 
 /**
  * Read registers V0 through Vx from memory starting at location I.
  * The interpreter reads values from memory starting at location I into registers V0 through Vx.
  */
-class LD_VX_I(val value: UShort) : Instruction(value), NotImplemented
+class LD_VX_I(val value: UShort) : Instruction(value), VXMask {
+    override fun execute(emulator: Emulator) {
+        val vX = vx(value)
+        val registersToVX = Register.V0..vX
+        for (register in registersToVX) {
+            val memoryAddress = emulator.indexRegister + register.value.toUShort()
+            emulator.registers[register] = emulator.memory[memoryAddress.toUByte()]
+        }
+    }
+}

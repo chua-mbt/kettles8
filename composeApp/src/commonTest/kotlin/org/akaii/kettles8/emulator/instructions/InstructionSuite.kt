@@ -5,6 +5,7 @@ import io.kotest.matchers.*
 import io.kotest.matchers.collections.*
 import io.kotest.matchers.types.*
 import org.akaii.kettles8.emulator.Emulator
+import org.akaii.kettles8.emulator.memory.Address
 import org.akaii.kettles8.emulator.memory.Registers.Companion.Register.*
 
 class InstructionSuite : FunSpec({
@@ -320,19 +321,19 @@ class InstructionSuite : FunSpec({
         val emulator = Emulator()
         emulator.indexRegister shouldBe 0x0000u
         instruction.execute(emulator)
-        emulator.indexRegister shouldBe 0xBCDu
+        emulator.indexRegister shouldBe 0x0BCDu
     }
 
     test("JP_V0") {
         val instruction = Instruction.decode(0xBBCDu)
         instruction.shouldBeTypeOf<JP_V0>()
-        instruction.address(instruction.value) shouldBe 0xBCDu
+        instruction.address(instruction.value) shouldBe 0x0BCDu
 
         val emulator = Emulator()
         emulator.registers[V0] = 0x01u
         emulator.programCounter shouldBe 0x0000u
         instruction.execute(emulator)
-        emulator.programCounter shouldBe 0xBCEu // 0xBCDu + 0x001u
+        emulator.programCounter shouldBe 0x0BCEu // 0xBCDu + 0x001u
     }
 
     test("RND_VX") {
@@ -399,4 +400,74 @@ class InstructionSuite : FunSpec({
         instruction.execute(emulator)
         emulator.soundTimer shouldBe 0x21u
     }
+
+    test("ADD_I_VX") {
+        val instruction = Instruction.decode(0xFA1Eu)
+        instruction.shouldBeTypeOf<ADD_I_VX>()
+        instruction.vx(instruction.value) shouldBe VA
+
+        val emulator = Emulator()
+        emulator.registers[VA] = 0x21u
+        emulator.indexRegister = 0x21u
+        instruction.execute(emulator)
+        emulator.indexRegister shouldBe 0x42u
+    }
+
+    test("LD_F_VX") {
+        val instruction = Instruction.decode(0xFA29u)
+        instruction.shouldBeTypeOf<LD_F_VX>()
+        instruction.vx(instruction.value) shouldBe VA
+
+        val emulator = Emulator()
+        emulator.registers[VA] = 0x02u
+        emulator.indexRegister shouldBe 0x0000u
+        instruction.execute(emulator)
+        val expectedFontAddress = Address.FONT_START + 0x000Au // 2x5 = 10
+        emulator.indexRegister shouldBe expectedFontAddress.toUShort()
+    }
+
+    test("LD_B_VX") {
+        val instruction = Instruction.decode(0xFA33u)
+        instruction.shouldBeTypeOf<LD_B_VX>()
+        instruction.vx(instruction.value) shouldBe VA
+
+        val emulator = Emulator()
+        emulator.registers[VA] = 123u
+        emulator.indexRegister = 0x000Au
+        instruction.execute(emulator)
+        emulator.memory[10u.toUByte()] shouldBe 1u
+        emulator.memory[11u.toUByte()] shouldBe 2u
+        emulator.memory[12u.toUByte()] shouldBe 3u
+    }
+
+    test("LD_I_VX") {
+        val instruction = Instruction.decode(0xFA55u)
+        instruction.shouldBeTypeOf<LD_I_VX>()
+        instruction.vx(instruction.value) shouldBe VA
+
+        val emulator = Emulator()
+        for (vx in V0..VA) {
+            emulator.registers[vx] = vx.value.toUByte()
+        }
+        emulator.indexRegister = 0x000Au
+        emulator.memory.slice(10..25) shouldContainOnly (listOf(0u))
+        instruction.execute(emulator)
+        emulator.memory.slice(10..25) shouldBe emulator.registers.toList().toUByteArray()
+    }
+
+    test("LD_VX_I") {
+        val instruction = Instruction.decode(0xFA65u)
+        instruction.shouldBeTypeOf<LD_VX_I>()
+        instruction.vx(instruction.value) shouldBe VA
+
+        val emulator = Emulator()
+        for (vx in V0..VA) {
+            emulator.memory[(10 + vx.value).toUByte()] = vx.value.toUByte()
+        }
+        emulator.indexRegister = 0x000Au
+        emulator.registers.toList() shouldContainOnly (listOf(0u))
+        instruction.execute(emulator)
+        emulator.registers.toList().toUByteArray() shouldBe emulator.memory.slice(10..25)
+    }
+
 })
