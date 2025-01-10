@@ -17,26 +17,28 @@ class Display {
         const val DISPLAY_HEIGHT = 32
     }
 
-    private val underlying: Array<Array<MutableState<Boolean>>> =
-        Array(DISPLAY_WIDTH) { Array(DISPLAY_HEIGHT) { mutableStateOf(false) } }
+    private val underlying: Array<Array<MutableState<UByte>>> =
+        Array(DISPLAY_WIDTH) { Array(DISPLAY_HEIGHT) { mutableStateOf(0u) } }
 
     fun fill() {
-        underlying.forEach { it.forEach { cell -> cell.value = true } }
+        underlying.forEach { it.forEach { cell -> cell.value = UByte.MAX_VALUE } }
     }
 
     fun clear() {
-        underlying.forEach { it.forEach { cell -> cell.value = false } }
+        underlying.forEach { it.forEach { cell -> cell.value = UByte.MIN_VALUE } }
     }
 
-    fun flattened(): List<Boolean> = underlying.flatten().map { it.value }
+    fun flattened(): List<UByte> = underlying.flatten().map { it.value }
 
-    operator fun get(row: Int, column: Int): Boolean = underlying[row][column].value
-    operator fun set(row: Int, column: Int, value: Boolean) {
-        underlying[row][column].value = value
+    operator fun get(row: Int, column: Int): UByte = underlying[row][column].value
+    operator fun set(row: Int, column: Int, value: UByte) {
+        if (value == UByte.MIN_VALUE) underlying[row][column].value = value
+        else underlying[row][column].value = UByte.MAX_VALUE
     }
 
     fun flip(row: Int, column: Int) {
-        underlying[row][column].value = !underlying[row][column].value
+        if (underlying[row][column].value == UByte.MIN_VALUE) underlying[row][column].value = UByte.MAX_VALUE
+        else underlying[row][column].value = UByte.MIN_VALUE
     }
 
     @Composable
@@ -48,9 +50,8 @@ class Display {
             val unitHeight = size.height / DISPLAY_HEIGHT
             underlying.forEachIndexed { column, columns ->
                 columns.forEachIndexed { row, cell ->
-                    val color = if (cell.value) Color.Black else Color.Transparent
                     drawRect(
-                        color = color,
+                        color = Color.Black.copy(alpha = cell.value.toFloat()),
                         topLeft = Offset(column * unitWidth, row * unitHeight),
                         size = Size(unitWidth + 1, unitHeight + 1)
                     )

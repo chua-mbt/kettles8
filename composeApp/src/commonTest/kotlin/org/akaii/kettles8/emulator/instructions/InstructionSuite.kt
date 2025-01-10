@@ -15,10 +15,10 @@ class InstructionSuite : FunSpec({
 
         val emulator = Emulator()
         emulator.display.fill()
-        emulator.display.flattened().shouldContainOnly(true)
+        emulator.display.flattened().shouldContainOnly(UByte.MAX_VALUE)
 
         instruction.execute(emulator.cpu, emulator.memory, emulator.display)
-        emulator.display.flattened().shouldContainOnly(false)
+        emulator.display.flattened().shouldContainOnly(UByte.MIN_VALUE)
     }
 
     test("RET") {
