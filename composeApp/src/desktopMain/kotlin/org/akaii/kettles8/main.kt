@@ -8,6 +8,6 @@ fun main() = application {
         onCloseRequest = ::exitApplication,
         title = "kettles8",
     ) {
-        App()
+        App.render(App.AppMode.SPRITE_TEST)
     }
 }

@@ -15,6 +15,12 @@ class Display {
     companion object {
         const val DISPLAY_WIDTH = 64
         const val DISPLAY_HEIGHT = 32
+
+        fun normalize(pixel: UByte): UByte =
+            if (pixel == UByte.MIN_VALUE) 0u else UByte.MAX_VALUE
+
+        fun isOn(pixel: UByte): Boolean =
+            pixel == UByte.MAX_VALUE
     }
 
     private val underlying: Array<Array<MutableState<UByte>>> =
@@ -30,10 +36,9 @@ class Display {
 
     fun flattened(): List<UByte> = underlying.flatten().map { it.value }
 
-    operator fun get(row: Int, column: Int): UByte = underlying[row][column].value
-    operator fun set(row: Int, column: Int, value: UByte) {
-        if (value == UByte.MIN_VALUE) underlying[row][column].value = value
-        else underlying[row][column].value = UByte.MAX_VALUE
+    operator fun get(row: UByte, column: UByte): UByte = underlying[row.toInt()][column.toInt()].value
+    operator fun set(row: UByte, column: UByte, value: UByte) {
+        underlying[row.toInt()][column.toInt()].value = normalize(value)
     }
 
     fun flip(row: Int, column: Int) {
@@ -51,7 +56,7 @@ class Display {
             underlying.forEachIndexed { column, columns ->
                 columns.forEachIndexed { row, cell ->
                     drawRect(
-                        color = Color.Black.copy(alpha = cell.value.toFloat()),
+                        color = Color.Black.copy(alpha = cell.value.toFloat() / UByte.MAX_VALUE.toFloat()),
                         topLeft = Offset(column * unitWidth, row * unitHeight),
                         size = Size(unitWidth + 1, unitHeight + 1)
                     )

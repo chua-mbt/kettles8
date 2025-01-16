@@ -350,7 +350,100 @@ class InstructionSuite : FunSpec({
     }
 
     test("DRW_VX_VY") {
-        // TODO: Implement DRW_VX_VY
+        val instruction = Instruction.decode(0xD123u)
+        instruction.shouldBeTypeOf<DRW_VX_VY>()
+
+        val emulator = Emulator()
+
+        emulator.memory[0x200u.toUByte()] = 0b11100000u
+        emulator.memory[0x201u.toUByte()] = 0b10100000u
+        emulator.memory[0x202u.toUByte()] = 0b11100000u
+
+        emulator.cpu.registers[V1] = 5u
+        emulator.cpu.registers[V2] = 10u
+        emulator.cpu.indexRegister = 0x200u
+
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+
+        emulator.display[5u, 10u] shouldBe UByte.MAX_VALUE
+        emulator.display[5u, 11u] shouldBe UByte.MAX_VALUE
+        emulator.display[5u, 12u] shouldBe UByte.MAX_VALUE
+        emulator.display[6u, 10u] shouldBe UByte.MAX_VALUE
+        emulator.display[6u, 11u] shouldBe UByte.MIN_VALUE
+        emulator.display[6u, 12u] shouldBe UByte.MAX_VALUE
+        emulator.display[7u, 10u] shouldBe UByte.MAX_VALUE
+        emulator.display[7u, 11u] shouldBe UByte.MAX_VALUE
+        emulator.display[7u, 12u] shouldBe UByte.MAX_VALUE
+
+        emulator.cpu.registers[VF] shouldBe 0u
+    }
+
+    test("DRW_VX_VY - Wrapping") {
+        val instruction = Instruction.decode(0xD123u)
+        instruction.shouldBeTypeOf<DRW_VX_VY>()
+
+        val emulator = Emulator()
+
+        emulator.memory[0x200u.toUByte()] = 0b11100000u
+        emulator.memory[0x201u.toUByte()] = 0b10100000u
+        emulator.memory[0x202u.toUByte()] = 0b11100000u
+
+        emulator.cpu.registers[V1] = 62u
+        emulator.cpu.registers[V2] = 30u
+        emulator.cpu.indexRegister = 0x200u
+
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+
+        emulator.display[62u, 30u] shouldBe UByte.MAX_VALUE
+        emulator.display[62u, 31u] shouldBe UByte.MAX_VALUE
+        emulator.display[62u, 0u] shouldBe UByte.MAX_VALUE
+        emulator.display[63u, 30u] shouldBe UByte.MAX_VALUE
+        emulator.display[63u, 31u] shouldBe UByte.MIN_VALUE
+        emulator.display[63u, 0u] shouldBe UByte.MAX_VALUE
+        emulator.display[0u, 30u] shouldBe UByte.MAX_VALUE
+        emulator.display[0u, 31u] shouldBe UByte.MAX_VALUE
+        emulator.display[0u, 0u] shouldBe UByte.MAX_VALUE
+
+        emulator.cpu.registers[VF] shouldBe 0u
+    }
+
+    test("DRW_VX_VY - Erasure") {
+        val instruction = Instruction.decode(0xD123u)
+        instruction.shouldBeTypeOf<DRW_VX_VY>()
+
+        val emulator = Emulator()
+
+        emulator.memory[0x200u.toUByte()] = 0b11100000u
+        emulator.memory[0x201u.toUByte()] = 0b10100000u
+        emulator.memory[0x202u.toUByte()] = 0b11100000u
+
+        emulator.cpu.registers[V1] = 62u
+        emulator.cpu.registers[V2] = 30u
+        emulator.cpu.indexRegister = 0x200u
+
+        emulator.display[62u, 30u] = UByte.MAX_VALUE
+        emulator.display[62u, 31u] = UByte.MAX_VALUE
+        emulator.display[62u, 0u] = UByte.MAX_VALUE
+        emulator.display[63u, 30u] = UByte.MAX_VALUE
+        emulator.display[63u, 31u] = UByte.MIN_VALUE
+        emulator.display[63u, 0u] = UByte.MAX_VALUE
+        emulator.display[0u, 30u] = UByte.MAX_VALUE
+        emulator.display[0u, 31u] = UByte.MAX_VALUE
+        emulator.display[0u, 0u] = UByte.MAX_VALUE
+
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display)
+
+        emulator.display[62u, 30u] shouldBe UByte.MIN_VALUE
+        emulator.display[62u, 31u] shouldBe UByte.MIN_VALUE
+        emulator.display[62u, 0u] shouldBe UByte.MIN_VALUE
+        emulator.display[63u, 30u] shouldBe UByte.MIN_VALUE
+        emulator.display[63u, 31u] shouldBe UByte.MIN_VALUE
+        emulator.display[63u, 0u] shouldBe UByte.MIN_VALUE
+        emulator.display[0u, 30u] shouldBe UByte.MIN_VALUE
+        emulator.display[0u, 31u] shouldBe UByte.MIN_VALUE
+        emulator.display[0u, 0u] shouldBe UByte.MIN_VALUE
+
+        emulator.cpu.registers[VF] shouldBe 1u
     }
 
     test("SKP_VX") {

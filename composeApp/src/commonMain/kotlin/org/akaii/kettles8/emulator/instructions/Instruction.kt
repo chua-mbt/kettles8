@@ -85,6 +85,15 @@ interface VYMask {
     }
 }
 
+interface NMask {
+    private val nMask: UShort
+        get() = 0x000Fu
+
+    fun n(value: UShort): UByte {
+        return (value and nMask).toUByte()
+    }
+}
+
 interface ByteMask {
     private val byteMask: UShort
         get() = 0x00FFu
@@ -383,7 +392,28 @@ class RND_VX(val value: UShort) : Instruction(value), VXMask, ByteMask {
  * If the sprite is positioned so part of it is outside the coordinates of the display, it wraps around to the opposite side of the screen.
  * See instruction 8xy3 for more information on XOR, and section 2.4, Display, for more information on the Chip-8 screen and sprites.
  */
-class DRW_VX_VY(val value: UShort) : Instruction(value), NotImplemented
+class DRW_VX_VY(val value: UShort) : Instruction(value), VXMask, VYMask, NMask {
+    fun screenWrap(coordinate: UInt, border: Int): UInt = coordinate.mod(border.toUInt())
+
+    override fun execute(cpu: CPU, memory: Memory, display: Display) {
+        val startX = cpu.registers[vx(value)]
+        val startY = cpu.registers[vy(value)]
+        val memStart = cpu.indexRegister.toUInt()
+        val memEnd = memStart + n(value)
+        for (spriteByteAddress in memStart..<memEnd) {
+            val offSetY = spriteByteAddress - memStart
+            val displayY = screenWrap(startY + offSetY, Display.DISPLAY_HEIGHT)
+            val spriteByte = memory[spriteByteAddress.toUByte()]
+            for (offsetX in 0..<8) {
+                val displayX = screenWrap(startX + offsetX.toUInt(), Display.DISPLAY_WIDTH)
+                val spriteBit = Display.normalize(spriteByte and (0x80u shr offsetX).toUByte())
+                val displayPixel = display[displayX.toUByte(), displayY.toUByte()]
+                display[displayX.toUByte(), displayY.toUByte()] = displayPixel xor spriteBit
+                if(Display.isOn(displayPixel)) cpu.registers[Register.VF] = 1u
+            }
+        }
+    }
+}
 
 /**
  * Skip next instruction if key with the value of Vx is pressed.
