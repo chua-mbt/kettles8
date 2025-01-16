@@ -28,14 +28,18 @@ object App {
                     emulator.cpu.indexRegister = (Address.FONT_START + 50u).toUShort()
                     emulator.cpu.registers[Registers.Companion.Register.V0] = 0x5u
                     emulator.cpu.registers[Registers.Companion.Register.V1] = 0x5u
-                    Instruction.decode(0xD015u).execute(emulator.cpu, emulator.memory, emulator.display)
+                    Instruction.decode(0xD015u)
+                        .execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
                 }
+
                 AppMode.FONT_WRAP_TEST -> {
                     emulator.cpu.indexRegister = (Address.FONT_START + 50u).toUShort()
                     emulator.cpu.registers[Registers.Companion.Register.V0] = 0x3Eu
                     emulator.cpu.registers[Registers.Companion.Register.V1] = 0x3Eu
-                    Instruction.decode(0xD015u).execute(emulator.cpu, emulator.memory, emulator.display)
+                    Instruction.decode(0xD015u)
+                        .execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
                 }
+
                 AppMode.FLIP_TEST -> {
                     LaunchedEffect(Unit) {
                         while (true) {
@@ -47,6 +51,7 @@ object App {
                         }
                     }
                 }
+
                 AppMode.SPRITE_TEST -> {
                     emulator.memory[0x200u.toUByte()] = 0b11100000u
                     emulator.memory[0x201u.toUByte()] = 0b10100000u
@@ -56,7 +61,8 @@ object App {
                     emulator.cpu.registers[Registers.Companion.Register.V2] = 5u  // Y position
 
                     emulator.cpu.indexRegister = 0x200u
-                    Instruction.decode(0xD123u).execute(emulator.cpu, emulator.memory, emulator.display)
+                    Instruction.decode(0xD123u)
+                        .execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
                 }
             }
         }
