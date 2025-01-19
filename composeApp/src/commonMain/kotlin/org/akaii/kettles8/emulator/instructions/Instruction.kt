@@ -55,8 +55,6 @@ sealed class Instruction(value: UShort) : Executable {
             OpCode.LD_VX_I -> LD_VX_I(value)
         }
     }
-
-    fun describe() = println(description())
 }
 
 interface AddressMask {

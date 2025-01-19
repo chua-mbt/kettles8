@@ -26,4 +26,9 @@ class CPU {
     fun advanceProgram() {
         programCounter = (programCounter + INSTRUCTION_SIZE).toUShort()
     }
+
+    fun updateTimers() {
+        if(delayTimer > 0u) delayTimer--
+        if(soundTimer > 0u) soundTimer--
+    }
 }

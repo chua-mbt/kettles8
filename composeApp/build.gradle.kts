@@ -39,13 +39,16 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
+            implementation(libs.kotlin.logging)
+            implementation(libs.slf4j.api)
+            implementation(libs.slf4j.simple)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
         }
         commonTest.dependencies {
-            implementation("io.kotest:kotest-runner-junit5:5.9.1")
+            implementation(libs.kotest.runner.junit5)
         }
     }
 }
