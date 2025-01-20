@@ -18,7 +18,7 @@ fun main() = application {
     ) {
         Row(modifier = Modifier.wrapContentSize()) {
             EmulatorApp.render(EmulatorApp.AppMode.SPRITE_TEST)
-            WindowKeypad(onKeyPress = { key -> }).render()
+            WindowKeypad(EmulatorApp.emulator.keypad::onDown, EmulatorApp.emulator.keypad::onUp).render()
         }
     }
 }

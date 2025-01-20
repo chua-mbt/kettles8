@@ -13,6 +13,8 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.random.Random
 
 object EmulatorApp {
+    val emulator = Emulator()
+
     enum class AppMode {
         FONT_TEST, FONT_WRAP_TEST, FLIP_TEST, SPRITE_TEST
     }
@@ -21,7 +23,6 @@ object EmulatorApp {
     @Preview
     fun render(mode: AppMode) {
         MaterialTheme {
-            val emulator = Emulator()
             emulator.display.render()
             when (mode) {
                 AppMode.FONT_TEST -> {

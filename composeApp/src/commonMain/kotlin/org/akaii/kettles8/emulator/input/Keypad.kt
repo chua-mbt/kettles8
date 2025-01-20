@@ -26,4 +26,12 @@ class Keypad {
     operator fun set(key: UByte, value: Boolean) {
         set(Key.ofValue(key), value)
     }
+
+    fun onDown(key: Key) {
+        set(key, true)
+    }
+
+    fun onUp(key: Key) {
+        set(key, false)
+    }
 }

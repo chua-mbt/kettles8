@@ -9,7 +9,7 @@ import androidx.compose.ui.graphics.Color
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.akaii.kettles8.emulator.input.Keypad.Companion.Key
 
-class WindowKeypad(private val onKeyPress: (Key) -> Unit) {
+class WindowKeypad(private val onDown: (Key) -> Unit, private val onUp: (Key) -> Unit) {
     companion object {
         val KEYS = arrayOf(
             arrayOf(Key.K1, Key.K2, Key.K3, Key.KC),
@@ -20,6 +20,15 @@ class WindowKeypad(private val onKeyPress: (Key) -> Unit) {
     }
 
     private val logger = KotlinLogging.logger {}
+
+    fun logKey(action: String): (handler: (Key) -> Unit) -> (Key) -> Unit {
+        return { handler ->
+            { key ->
+                logger.debug { "Key $action: $key" }
+                handler(key)
+            }
+        }
+    }
 
     @Composable
     fun render() {
@@ -34,10 +43,7 @@ class WindowKeypad(private val onKeyPress: (Key) -> Unit) {
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     for (key in row) {
-                        KeyButton(key = key, onClick = {
-                            logger.debug { "Key pressed: $key" }
-                            onKeyPress(key)
-                        }).render()
+                        KeyButton(key = key, logKey("Down")(onDown), logKey("Up")(onUp)).render()
                     }
                 }
             }
