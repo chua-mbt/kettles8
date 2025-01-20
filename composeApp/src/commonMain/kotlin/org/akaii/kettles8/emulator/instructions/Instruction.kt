@@ -408,7 +408,7 @@ class DRW_VX_VY(val value: UShort) : Instruction(value), VXMask, VYMask, NMask {
                 val spriteBit = Display.normalize(spriteByte and (0x80u shr offsetX).toUByte())
                 val displayPixel = display[displayX.toUByte(), displayY.toUByte()]
                 display[displayX.toUByte(), displayY.toUByte()] = displayPixel xor spriteBit
-                if(Display.isOn(displayPixel)) cpu.registers[Register.VF] = 1u
+                if (Display.isOn(displayPixel)) cpu.registers[Register.VF] = 1u
             }
         }
     }
@@ -420,7 +420,7 @@ class DRW_VX_VY(val value: UShort) : Instruction(value), VXMask, VYMask, NMask {
  */
 class SKP_VX(val value: UShort) : Instruction(value), VXMask {
     override fun execute(cpu: CPU, memory: Memory, display: Display, keypad: Keypad) {
-        if(keypad[cpu.registers[vx(value)]]) {
+        if (keypad[cpu.registers[vx(value)]]) {
             cpu.advanceProgram()
         }
     }
@@ -432,7 +432,7 @@ class SKP_VX(val value: UShort) : Instruction(value), VXMask {
  */
 class SKNP_VX(val value: UShort) : Instruction(value), VXMask {
     override fun execute(cpu: CPU, memory: Memory, display: Display, keypad: Keypad) {
-        if(!keypad[cpu.registers[vx(value)]]) {
+        if (!keypad[cpu.registers[vx(value)]]) {
             cpu.advanceProgram()
         }
     }
@@ -452,7 +452,11 @@ class LD_VX_DT(val value: UShort) : Instruction(value), VXMask {
  * Wait for a key press, store the value of the key in Vx.
  * All execution stops until a key is pressed, then the value of that key is stored in Vx.
  */
-class LD_VX_K(val value: UShort) : Instruction(value), NotImplemented
+class LD_VX_K(val value: UShort) : Instruction(value), VXMask {
+    override fun execute(cpu: CPU, memory: Memory, display: Display, keypad: Keypad) {
+        keypad.futureInput.onNextKeyReady { cpu.registers[vx(value)] = it.value }
+    }
+}
 
 /**
  * Set delay timer = Vx.

@@ -16,9 +16,13 @@ class Keypad {
     }
 
     private val underlying: BooleanArray = BooleanArray(Key.entries.size)
+    private val previous: BooleanArray = BooleanArray(Key.entries.size)
+
+    val futureInput: FutureInput = FutureInput()
 
     operator fun get(key: Key): Boolean = underlying[key.value.toInt()]
     operator fun set(key: Key, value: Boolean) {
+        previous[key.value.toInt()] = underlying[key.value.toInt()]
         underlying[key.value.toInt()] = value
     }
 
@@ -34,4 +38,20 @@ class Keypad {
     fun onUp(key: Key) {
         set(key, false)
     }
+
+    fun keyReleased(): Key? {
+        val justReleased = underlying.zip(previous).zip(underlying.indices).find {
+            (pair, _) ->
+                val (currently, previously) = pair
+                !currently && previously
+        }?.second
+        return justReleased?.let { Key.ofValue(it.toUByte()) }
+    }
+
+    fun clearPrevious() {
+        for (key in Key.entries) {
+            previous[key.value.toInt()] = false
+        }
+    }
+
 }

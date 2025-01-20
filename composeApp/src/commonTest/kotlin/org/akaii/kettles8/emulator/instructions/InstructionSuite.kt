@@ -500,7 +500,34 @@ class InstructionSuite : FunSpec({
     }
 
     test("LD_VX_K") {
-        // TODO: Implement LD_VX_K
+        val instruction = Instruction.decode(0xFA0Au)
+        instruction.shouldBeTypeOf<LD_VX_K>()
+        instruction.vx(instruction.value) shouldBe VA
+
+        val emulator = Emulator()
+        emulator.cpu.registers[VA] shouldBe 0u
+        emulator.keypad.futureInput.isPending() shouldBe false
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
+        emulator.keypad.futureInput.isPending() shouldBe true
+
+        emulator.keypad.futureInput.checkInput(emulator.keypad)
+        emulator.keypad.futureInput.isPending() shouldBe true
+        emulator.cpu.registers[VA] shouldBe 0u
+
+        emulator.keypad[Key.KF] = true
+        emulator.keypad.futureInput.checkInput(emulator.keypad)
+        emulator.keypad.futureInput.isPending() shouldBe true
+        emulator.cpu.registers[VA] shouldBe 0u
+
+        emulator.keypad[Key.KF] = false
+        emulator.keypad.futureInput.checkInput(emulator.keypad)
+        emulator.keypad.futureInput.isPending() shouldBe false
+        emulator.cpu.registers[VA] shouldBe Key.KF.value
+
+        emulator.keypad[Key.K0] = true
+        emulator.keypad.futureInput.checkInput(emulator.keypad)
+        emulator.keypad.futureInput.isPending() shouldBe false
+        emulator.cpu.registers[VA] shouldBe Key.KF.value
     }
 
     test("LD_DT_VX") {
