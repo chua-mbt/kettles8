@@ -1,20 +1,20 @@
 package org.akaii.kettles8.emulator.display
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.*
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.*
 
 class Display {
     companion object {
         const val DISPLAY_WIDTH = 64
         const val DISPLAY_HEIGHT = 32
+
+        const val DISPLAY_WIDTH_DP = DISPLAY_WIDTH * 10
+        const val DISPLAY_HEIGHT_DP = DISPLAY_HEIGHT * 10
 
         fun normalize(pixel: UByte): UByte =
             if (pixel == UByte.MIN_VALUE) 0u else UByte.MAX_VALUE
@@ -49,7 +49,7 @@ class Display {
     @Composable
     fun render() {
         Canvas(
-            modifier = Modifier.fillMaxSize().background(Color.White),
+            modifier = Modifier.size(DISPLAY_WIDTH_DP.dp, DISPLAY_HEIGHT_DP.dp).background(Color.White),
         ) {
             val unitWidth = size.width / DISPLAY_WIDTH
             val unitHeight = size.height / DISPLAY_HEIGHT
@@ -58,7 +58,7 @@ class Display {
                     drawRect(
                         color = Color.Black.copy(alpha = cell.value.toFloat() / UByte.MAX_VALUE.toFloat()),
                         topLeft = Offset(column * unitWidth, row * unitHeight),
-                        size = Size(unitWidth + 1, unitHeight + 1)
+                        size = Size(unitWidth + 1, unitHeight + 1) // + 1 Removes gaps between cells
                     )
                 }
             }

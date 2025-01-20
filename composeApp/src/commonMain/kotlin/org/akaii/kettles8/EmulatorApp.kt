@@ -12,7 +12,7 @@ import org.akaii.kettles8.emulator.memory.Registers
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.random.Random
 
-object App {
+object EmulatorApp {
     enum class AppMode {
         FONT_TEST, FONT_WRAP_TEST, FLIP_TEST, SPRITE_TEST
     }

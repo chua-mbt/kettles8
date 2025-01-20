@@ -2,9 +2,11 @@ package org.akaii.kettles8.emulator.input
 
 class Keypad {
     companion object {
-        enum class Key(val value: UByte) {
-            K0(0u), K1(1u), K2(2u), K3(3u), K4(4u), K5(5u), K6(6u), K7(7u),
-            K8(8u), K9(9u), KA(10u), KB(11u), KC(12u), KD(13u), KE(14u), KF(15u);
+        enum class Key(val value: UByte, val text: String) {
+            K0(0u, "0"), K1(1u, "1"), K2(2u, "2"), K3(3u, "3"),
+            K4(4u, "4"), K5(5u, "5"), K6(6u, "6"), K7(7u, "7"),
+            K8(8u, "8"), K9(9u, "9"), KA(10u, "A"), KB(11u, "B"),
+            KC(12u, "C"), KD(13u, "D"), KE(14u, "E"), KF(15u, "F");
 
             companion object {
                 fun ofValue(value: UByte): Key =
