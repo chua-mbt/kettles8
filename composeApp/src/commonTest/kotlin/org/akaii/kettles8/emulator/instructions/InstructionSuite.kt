@@ -1,13 +1,10 @@
 package org.akaii.kettles8.emulator.instructions
 
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.matchers.collections.shouldBeEmpty
-import io.kotest.matchers.collections.shouldContain
-import io.kotest.matchers.collections.shouldContainOnly
-import io.kotest.matchers.collections.shouldNotBeEmpty
-import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
-import io.kotest.matchers.types.shouldBeTypeOf
+import io.kotest.matchers.collections.*
+import io.kotest.matchers.*
+import io.kotest.matchers.string.*
+import io.kotest.matchers.types.*
 import org.akaii.kettles8.emulator.Emulator
 import org.akaii.kettles8.emulator.input.Keypad.Companion.Key
 import org.akaii.kettles8.emulator.memory.Address
@@ -49,6 +46,8 @@ class InstructionSuite : FunSpec({
 
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.programCounter shouldBe expectedAddress
+
+        instruction.description() shouldEndWith "JP 0x0FF1"
     }
 
     test("CALL") {
@@ -67,6 +66,8 @@ class InstructionSuite : FunSpec({
         emulator.cpu.programCounter shouldBe expectedAddress
         emulator.cpu.stack.shouldContain(originalAddress)
         emulator.cpu.stack.size shouldBe 1
+
+        instruction.description() shouldEndWith "CALL 0x0FF1"
     }
 
     test("SE_VX_BYTE") {
@@ -85,6 +86,8 @@ class InstructionSuite : FunSpec({
         emulator.cpu.registers[VA] = 0x21u
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.programCounter shouldBe 0x0004u // Skip the next instruction
+
+        instruction.description() shouldEndWith "SE_VX_BYTE VA, 0x21"
     }
 
     test("SNE_VX_BYTE") {
@@ -103,6 +106,8 @@ class InstructionSuite : FunSpec({
         emulator.cpu.registers[VA] = 0x20u
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.programCounter shouldBe 0x0004u // Skip the next instruction
+
+        instruction.description() shouldEndWith "SNE_VX_BYTE VA, 0x21"
     }
 
     test("SE_VX_VY") {
@@ -123,6 +128,8 @@ class InstructionSuite : FunSpec({
         emulator.cpu.programCounter = 0x0002u
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.programCounter shouldBe 0x0002u // No skip
+
+        instruction.description() shouldEndWith "SE_VX_VY VA, VB"
     }
 
     test("LD_VX_BYTE") {
@@ -135,6 +142,8 @@ class InstructionSuite : FunSpec({
         emulator.cpu.registers[VA] shouldBe 0x00u
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.registers[VA] shouldBe 0x21u
+
+        instruction.description() shouldEndWith "LD_VX_BYTE VA, 0x21"
     }
 
     test("ADD_VX_BYTE") {
@@ -150,6 +159,8 @@ class InstructionSuite : FunSpec({
 
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.registers[VA] shouldBe 0x42u
+
+        instruction.description() shouldEndWith "ADD_VX_BYTE VA, 0x21"
     }
 
     test("LD_VX_VY") {
@@ -163,6 +174,8 @@ class InstructionSuite : FunSpec({
         emulator.cpu.registers[VB] = 0x21u
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.registers[VA] shouldBe 0x21u
+
+        instruction.description() shouldEndWith "LD_VX_VY VA, VB"
     }
 
     test("OR_VX_VY") {
@@ -176,6 +189,8 @@ class InstructionSuite : FunSpec({
         emulator.cpu.registers[VB] = 0b1100u
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.registers[VA] shouldBe 0b1110u
+
+        instruction.description() shouldEndWith "OR_VX_VY VA, VB"
     }
 
     test("AND_VX_VY") {
@@ -189,6 +204,8 @@ class InstructionSuite : FunSpec({
         emulator.cpu.registers[VB] = 0b1100u
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.registers[VA] shouldBe 0b1000u
+
+        instruction.description() shouldEndWith "AND_VX_VY VA, VB"
     }
 
     test("XOR_VX_VY") {
@@ -202,6 +219,8 @@ class InstructionSuite : FunSpec({
         emulator.cpu.registers[VB] = 0b1100u
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.registers[VA] shouldBe 0b0110u
+
+        instruction.description() shouldEndWith "XOR_VX_VY VA, VB"
     }
 
     test("ADD_VX_VY") {
@@ -222,6 +241,8 @@ class InstructionSuite : FunSpec({
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.registers[VA] shouldBe 0x02u
         emulator.cpu.registers[VF] shouldBe 0x00u // No overflow
+
+        instruction.description() shouldEndWith "ADD_VX_VY VA, VB"
     }
 
     test("SUB_VX_VY") {
@@ -242,6 +263,8 @@ class InstructionSuite : FunSpec({
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.registers[VA] shouldBe 0xFFu
         emulator.cpu.registers[VF] shouldBe 0x00u // No borrow
+
+        instruction.description() shouldEndWith "SUB_VX_VY VA, VB"
     }
 
     test("SHR_VX") {
@@ -259,6 +282,8 @@ class InstructionSuite : FunSpec({
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.registers[VA] shouldBe 0b0010u
         emulator.cpu.registers[VF] shouldBe 1u // Carry from LSB
+
+        instruction.description() shouldEndWith "SHR_VX VA"
     }
 
     test("SUBN_VX_VY") {
@@ -279,6 +304,8 @@ class InstructionSuite : FunSpec({
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.registers[VA] shouldBe 0xFFu
         emulator.cpu.registers[VF] shouldBe 0x00u // No borrow
+
+        instruction.description() shouldEndWith "SUBN_VX_VY VA, VB"
     }
 
     test("SHL_VX") {
@@ -296,6 +323,8 @@ class InstructionSuite : FunSpec({
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.registers[VA] shouldBe 0b01000000u
         emulator.cpu.registers[VF] shouldBe 1u // Carry from MSB
+
+        instruction.description() shouldEndWith "SHL_VX VA"
     }
 
     test("SNE_VX_VY") {
@@ -316,6 +345,8 @@ class InstructionSuite : FunSpec({
         emulator.cpu.programCounter = 0x0002u
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.programCounter shouldBe 0x0004u // Skip the next instruction
+
+        instruction.description() shouldEndWith "SNE_VX_VY VA, VB"
     }
 
     test("LD_I") {
@@ -327,6 +358,8 @@ class InstructionSuite : FunSpec({
         emulator.cpu.indexRegister shouldBe 0x0000u
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.indexRegister shouldBe 0x0BCDu
+
+        instruction.description() shouldEndWith "LD_I 0x0BCD"
     }
 
     test("JP_V0") {
@@ -339,6 +372,8 @@ class InstructionSuite : FunSpec({
         emulator.cpu.programCounter shouldBe Address.ROM_START
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.programCounter shouldBe 0x0BCEu // 0xBCDu + 0x001u
+
+        instruction.description() shouldEndWith "JP_V0 0x0BCD"
     }
 
     test("RND_VX") {
@@ -352,6 +387,8 @@ class InstructionSuite : FunSpec({
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.registers[VA] shouldNotBe 0x00u
         // TODO: Properly test randomness?
+
+        instruction.description() shouldEndWith "RND_VX VA, 0xBC"
     }
 
     test("DRW_VX_VY") {
@@ -381,6 +418,8 @@ class InstructionSuite : FunSpec({
         emulator.display[7u, 12u] shouldBe UByte.MAX_VALUE
 
         emulator.cpu.registers[VF] shouldBe 0u
+
+        instruction.description() shouldEndWith "DRW_VX_VY V1, V2, 0x03"
     }
 
     test("DRW_VX_VY - Wrapping") {
@@ -410,6 +449,8 @@ class InstructionSuite : FunSpec({
         emulator.display[0u, 0u] shouldBe UByte.MAX_VALUE
 
         emulator.cpu.registers[VF] shouldBe 0u
+
+        instruction.description() shouldEndWith "DRW_VX_VY V1, V2, 0x03"
     }
 
     test("DRW_VX_VY - Erasure") {
@@ -449,6 +490,8 @@ class InstructionSuite : FunSpec({
         emulator.display[0u, 0u] shouldBe UByte.MIN_VALUE
 
         emulator.cpu.registers[VF] shouldBe 1u
+
+        instruction.description() shouldEndWith "DRW_VX_VY V1, V2, 0x03"
     }
 
     test("SKP_VX") {
@@ -467,6 +510,8 @@ class InstructionSuite : FunSpec({
         emulator.keypad[Key.KB] = true
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.programCounter shouldBe 0x0004u // Skip the next instruction
+
+        instruction.description() shouldEndWith "SKP_VX VA"
     }
 
     test("SKNP_VX") {
@@ -485,6 +530,8 @@ class InstructionSuite : FunSpec({
         emulator.keypad[Key.KB] = false
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.programCounter shouldBe 0x0004u // Skip the next instruction
+
+        instruction.description() shouldEndWith "SKNP_VX VA"
     }
 
     test("LD_VX_DT") {
@@ -497,6 +544,8 @@ class InstructionSuite : FunSpec({
         emulator.cpu.delayTimer = 0x21u
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.registers[VA] shouldBe 0x21u
+
+        instruction.description() shouldEndWith "LD_VX_DT VA"
     }
 
     test("LD_VX_K") {
@@ -528,6 +577,8 @@ class InstructionSuite : FunSpec({
         emulator.keypad.futureInput.checkInput(emulator.keypad)
         emulator.keypad.futureInput.isPending() shouldBe false
         emulator.cpu.registers[VA] shouldBe Key.KF.value
+
+        instruction.description() shouldEndWith "LD_VX_K VA"
     }
 
     test("LD_DT_VX") {
@@ -540,6 +591,8 @@ class InstructionSuite : FunSpec({
         emulator.cpu.delayTimer shouldBe 0x00u
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.delayTimer shouldBe 0x21u
+
+        instruction.description() shouldEndWith "LD_DT_VX VA"
     }
 
     test("LD_ST_VX") {
@@ -552,6 +605,8 @@ class InstructionSuite : FunSpec({
         emulator.cpu.soundTimer shouldBe 0x00u
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.soundTimer shouldBe 0x21u
+
+        instruction.description() shouldEndWith "LD_ST_VX VA"
     }
 
     test("ADD_I_VX") {
@@ -564,6 +619,8 @@ class InstructionSuite : FunSpec({
         emulator.cpu.indexRegister = 0x21u
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.indexRegister shouldBe 0x42u
+
+        instruction.description() shouldEndWith "ADD_I_VX VA"
     }
 
     test("LD_F_VX") {
@@ -577,6 +634,8 @@ class InstructionSuite : FunSpec({
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         val expectedFontAddress = Address.FONT_START + 0x000Au // 2x5 = 10
         emulator.cpu.indexRegister shouldBe expectedFontAddress.toUShort()
+
+        instruction.description() shouldEndWith "LD_F_VX VA"
     }
 
     test("LD_B_VX") {
@@ -591,6 +650,8 @@ class InstructionSuite : FunSpec({
         emulator.memory[10u.toUByte()] shouldBe 1u
         emulator.memory[11u.toUByte()] shouldBe 2u
         emulator.memory[12u.toUByte()] shouldBe 3u
+
+        instruction.description() shouldEndWith "LD_B_VX VA"
     }
 
     test("LD_I_VX") {
@@ -606,6 +667,8 @@ class InstructionSuite : FunSpec({
         emulator.memory.slice(10..25) shouldContainOnly (listOf(0u))
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.memory.slice(10..25) shouldBe emulator.cpu.registers.toList().toUByteArray()
+
+        instruction.description() shouldEndWith "LD_I_VX VA"
     }
 
     test("LD_VX_I") {
@@ -621,6 +684,8 @@ class InstructionSuite : FunSpec({
         emulator.cpu.registers.toList() shouldContainOnly (listOf(0u))
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.registers.toList().toUByteArray() shouldBe emulator.memory.slice(10..25)
+
+        instruction.description() shouldEndWith "LD_VX_I VA"
     }
 
 })

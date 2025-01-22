@@ -11,7 +11,9 @@ plugins {
 
 kotlin {
     compilerOptions {
-        freeCompilerArgs.add("-opt-in=kotlin.ExperimentalUnsignedTypes")
+        freeCompilerArgs.addAll(
+            listOf("-opt-in=kotlin.ExperimentalUnsignedTypes", "-opt-in=kotlin.ExperimentalStdlibApi")
+        )
     }
 
     androidTarget {

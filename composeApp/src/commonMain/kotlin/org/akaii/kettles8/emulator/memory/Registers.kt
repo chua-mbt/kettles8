@@ -1,5 +1,7 @@
 package org.akaii.kettles8.emulator.memory
 
+import java.util.Locale
+
 class Registers {
 
     companion object {
@@ -41,6 +43,8 @@ class Registers {
                         return (startIdx..endIdx).mapNotNull { fromInt(it) }.iterator()
                     }
                 }
+
+            override fun toString(): String = "V${value.toString(16).uppercase(Locale.getDefault())}"
         }
     }
 
