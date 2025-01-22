@@ -45,6 +45,8 @@ kotlin {
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
+            implementation(libs.vinceglb.filekit.core)
+            implementation(libs.vinceglb.filekit.comp)
         }
         commonTest.dependencies {
             implementation(libs.kotest.runner.junit5)
@@ -91,6 +93,10 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "org.akaii.kettles8"
             packageVersion = "1.0.0"
+
+            linux {
+                modules("jdk.security.auth")
+            }
         }
     }
 }

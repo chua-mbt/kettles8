@@ -48,6 +48,11 @@ class Keypad {
         return justReleased?.let { Key.ofValue(it.toUByte()) }
     }
 
+    fun reset() {
+        underlying.fill(false)
+        previous.fill(false)
+    }
+
     fun clearPrevious() {
         for (key in Key.entries) {
             previous[key.value.toInt()] = false

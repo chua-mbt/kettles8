@@ -39,14 +39,17 @@ class Chip8RunLoop : Interpreter {
     }
 
     private fun cpuTick(cpu: CPU, memory: Memory, display: Display, keypad: Keypad) {
-        if (keypad.futureInput.isPending()) {
-            keypad.futureInput.checkInput(keypad)
-        } else {
-            val instruction = fetchInstruction(cpu, memory)
-            logger.debug { instruction.description() }
-            cpu.advanceProgram()
-            instruction.execute(cpu, memory, display, keypad)
-            keypad.clearPrevious()
+        if(cpu.running) {
+            cpu.cycles += 1
+            if (keypad.futureInput.isPending()) {
+                keypad.futureInput.checkInput(keypad)
+            } else {
+                val instruction = fetchInstruction(cpu, memory)
+                logger.debug { instruction.description() }
+                cpu.advanceProgram()
+                instruction.execute(cpu, memory, display, keypad)
+                keypad.clearPrevious()
+            }
         }
     }
 

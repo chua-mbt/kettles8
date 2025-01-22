@@ -336,7 +336,7 @@ class InstructionSuite : FunSpec({
 
         val emulator = Emulator()
         emulator.cpu.registers[V0] = 0x01u
-        emulator.cpu.programCounter shouldBe 0x0000u
+        emulator.cpu.programCounter shouldBe Address.ROM_START
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.programCounter shouldBe 0x0BCEu // 0xBCDu + 0x001u
     }

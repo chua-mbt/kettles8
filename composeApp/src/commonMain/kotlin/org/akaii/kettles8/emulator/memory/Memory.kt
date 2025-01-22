@@ -7,6 +7,11 @@ class Memory {
     private val underlying: UByteArray = UByteArray(Address.TOTAL_SIZE)
 
     init {
+        reset()
+    }
+
+    fun reset() {
+        underlying.fill(0u)
         DefaultFont.representation.copyInto(
             underlying,
             destinationOffset = Address.FONT_START.toInt(),

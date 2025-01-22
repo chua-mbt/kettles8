@@ -51,5 +51,9 @@ class Registers {
         underlying[register.value] = value
     }
 
+    fun reset() {
+        underlying.fill(0u)
+    }
+
     fun toList(): List<UByte> = underlying.toList()
 }

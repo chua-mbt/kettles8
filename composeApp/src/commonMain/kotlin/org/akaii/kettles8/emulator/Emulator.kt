@@ -7,14 +7,23 @@ import org.akaii.kettles8.emulator.interpreter.Interpreter
 import org.akaii.kettles8.emulator.memory.Memory
 
 class Emulator(
-    rom: UByteArray = UByteArray(0),
     val cpu: CPU = CPU(),
     val memory: Memory = Memory(),
     val display: Display = Display(),
     val keypad: Keypad = Keypad(),
     val interpreter: Interpreter = Chip8RunLoop()
 ) : Interpreter by interpreter {
-    init {
+
+    fun reset() {
+        cpu.reset()
+        memory.reset()
+        display.clear()
+        keypad.reset()
+    }
+
+    fun loadRom(rom: UByteArray) {
+        reset()
         memory.setFromROM(rom)
+        cpu.running = true
     }
 }
