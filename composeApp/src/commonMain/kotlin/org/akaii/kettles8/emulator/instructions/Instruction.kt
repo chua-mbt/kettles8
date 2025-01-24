@@ -3,6 +3,8 @@ package org.akaii.kettles8.emulator.instructions
 import org.akaii.kettles8.emulator.CPU
 import org.akaii.kettles8.emulator.display.DefaultFont
 import org.akaii.kettles8.emulator.display.Display
+import org.akaii.kettles8.emulator.format.Hex.UI16_FORMAT
+import org.akaii.kettles8.emulator.format.Hex.UI8_FORMAT
 import org.akaii.kettles8.emulator.input.Keypad
 import org.akaii.kettles8.emulator.memory.Address
 import org.akaii.kettles8.emulator.memory.Memory
@@ -19,17 +21,6 @@ sealed class Instruction(override val value: UShort) : HasValue, Executable {
 
     companion object {
         const val INSTRUCTION_SIZE: UInt = 2u
-
-        private fun hexFormat(len: Int): HexFormat = HexFormat {
-            upperCase = true
-            number {
-                prefix = "0x"
-                minLength = len
-            }
-        }
-
-        val UI16_FORMAT = hexFormat(4)
-        val UI8_FORMAT = hexFormat(2)
 
         fun decode(value: UShort): Instruction = when (OpCode.decode(value)) {
             OpCode.CLS -> CLS
