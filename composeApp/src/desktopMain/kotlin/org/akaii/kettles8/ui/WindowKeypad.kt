@@ -12,15 +12,13 @@ import androidx.compose.ui.graphics.Color
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.akaii.kettles8.emulator.input.Keypad.Companion.Key
 
-class WindowKeypad(private val onDown: (Key) -> Unit, private val onUp: (Key) -> Unit) {
-    companion object {
-        val KEYS = arrayOf(
-            arrayOf(Key.K1, Key.K2, Key.K3, Key.KC),
-            arrayOf(Key.K4, Key.K5, Key.K6, Key.KD),
-            arrayOf(Key.K7, Key.K8, Key.K9, Key.KE),
-            arrayOf(Key.KA, Key.K0, Key.KB, Key.KF)
-        )
-    }
+object WindowKeypad {
+    val KEYS = arrayOf(
+        arrayOf(Key.K1, Key.K2, Key.K3, Key.KC),
+        arrayOf(Key.K4, Key.K5, Key.K6, Key.KD),
+        arrayOf(Key.K7, Key.K8, Key.K9, Key.KE),
+        arrayOf(Key.KA, Key.K0, Key.KB, Key.KF)
+    )
 
     private val logger = KotlinLogging.logger {}
 
@@ -34,7 +32,7 @@ class WindowKeypad(private val onDown: (Key) -> Unit, private val onUp: (Key) ->
     }
 
     @Composable
-    fun render() {
+    operator fun invoke(onDown: (Key) -> Unit, onUp: (Key) -> Unit) {
         Column(
             modifier = Modifier.wrapContentSize().background(Color.Gray),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -46,7 +44,7 @@ class WindowKeypad(private val onDown: (Key) -> Unit, private val onUp: (Key) ->
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     for (key in row) {
-                        KeyButton(key = key, logKey("Down")(onDown), logKey("Up")(onUp)).render()
+                        KeyButton(key = key, logKey("Down")(onDown), logKey("Up")(onUp))
                     }
                 }
             }

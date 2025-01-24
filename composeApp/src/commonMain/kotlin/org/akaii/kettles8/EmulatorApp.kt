@@ -1,7 +1,5 @@
 package org.akaii.kettles8
 
-import androidx.compose.material.MaterialTheme
-import androidx.compose.runtime.Composable
 import org.akaii.kettles8.emulator.Emulator
 import org.akaii.kettles8.emulator.instructions.Instruction
 import org.akaii.kettles8.emulator.memory.Address
@@ -47,13 +45,6 @@ object EmulatorApp {
 
             AppMode.EMULATE ->
                 emulator.start(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
-        }
-    }
-
-    @Composable
-    fun render() {
-        MaterialTheme {
-            emulator.display.render()
         }
     }
 }

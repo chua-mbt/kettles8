@@ -13,13 +13,11 @@ import androidx.compose.ui.unit.dp
 import org.akaii.kettles8.emulator.display.Display
 import org.akaii.kettles8.emulator.input.Keypad.Companion.Key
 
-class KeyButton(private val key: Key, private val onDown: (Key) -> Unit, private val onUp: (Key) -> Unit) {
-    companion object {
-        val KEYPAD_SIZE_DP = Display.Companion.DISPLAY_HEIGHT_DP / WindowKeypad.Companion.KEYS.size
-    }
+object KeyButton {
+    val KEYPAD_SIZE_DP = Display.Companion.DISPLAY_HEIGHT_DP / WindowKeypad.KEYS.size
 
     @Composable
-    fun render() {
+    operator fun invoke(key: Key, onDown: (Key) -> Unit, onUp: (Key) -> Unit) {
         Button(
             onClick = {},
             modifier = Modifier.size(KEYPAD_SIZE_DP.dp).padding(4.dp).pointerInput(Unit) {

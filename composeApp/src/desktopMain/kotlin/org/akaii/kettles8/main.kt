@@ -2,6 +2,7 @@ package org.akaii.kettles8
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
@@ -16,6 +17,7 @@ import io.github.vinceglb.filekit.core.PickerType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.akaii.kettles8.EmulatorApp.emulator
 import org.akaii.kettles8.rom.ROMLoader
 import org.akaii.kettles8.ui.WindowKeypad
 import kotlin.io.path.Path
@@ -30,7 +32,7 @@ class DesktopApp {
         DisposableEffect(Unit) {
             EmulatorApp.start(EmulatorApp.AppMode.EMULATE)
             onDispose {
-                EmulatorApp.emulator.stop()
+                emulator.stop()
             }
         }
         Window(
@@ -42,16 +44,18 @@ class DesktopApp {
                 height = Dp.Unspecified
             )
         ) {
-            MenuBar {
-                Menu("File", mnemonic = 'F') {
-                    Item("ROM") {
-                        pickRom()
+            MaterialTheme {
+                MenuBar {
+                    Menu("File", mnemonic = 'F') {
+                        Item("ROM") {
+                            pickRom()
+                        }
                     }
                 }
-            }
-            Row(modifier = Modifier.wrapContentSize()) {
-                EmulatorApp.render()
-                WindowKeypad(EmulatorApp.emulator.keypad::onDown, EmulatorApp.emulator.keypad::onUp).render()
+                Row(modifier = Modifier.wrapContentSize()) {
+                    emulator.display.render()
+                    WindowKeypad(emulator.keypad::onDown, emulator.keypad::onUp)
+                }
             }
         }
     }
@@ -67,7 +71,7 @@ class DesktopApp {
 
             file?.path?.let {
                 val rom = ROMLoader(Path(it)).load()
-                EmulatorApp.emulator.loadRom(rom)
+                emulator.loadRom(rom)
             }
         }
     }

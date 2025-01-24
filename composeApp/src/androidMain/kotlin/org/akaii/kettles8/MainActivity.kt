@@ -11,7 +11,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            EmulatorApp.render(EmulatorApp.AppMode.FONT_WRAP_TEST)
+            EmulatorApp.render()
         }
     }
 }
@@ -19,5 +19,5 @@ class MainActivity : ComponentActivity() {
 @Preview
 @Composable
 fun AppAndroidPreview() {
-    EmulatorApp.render(EmulatorApp.AppMode.FONT_WRAP_TEST)
+    EmulatorApp.render()
 }

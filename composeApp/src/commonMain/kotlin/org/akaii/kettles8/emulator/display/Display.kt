@@ -41,11 +41,6 @@ class Display {
         underlying[row.toInt()][column.toInt()].value = normalize(value)
     }
 
-    fun flip(row: Int, column: Int) {
-        if (underlying[row][column].value == UByte.MIN_VALUE) underlying[row][column].value = UByte.MAX_VALUE
-        else underlying[row][column].value = UByte.MIN_VALUE
-    }
-
     @Composable
     fun render() {
         Canvas(
