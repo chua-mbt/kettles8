@@ -1,12 +1,6 @@
 package org.akaii.kettles8.emulator.display
 
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.*
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.*
 
 class Display {
     companion object {
@@ -41,23 +35,6 @@ class Display {
         underlying[row.toInt()][column.toInt()].value = normalize(value)
     }
 
-    @Composable
-    fun render() {
-        Canvas(
-            modifier = Modifier.size(DISPLAY_WIDTH_DP.dp, DISPLAY_HEIGHT_DP.dp).background(Color.White),
-        ) {
-            val unitWidth = size.width / DISPLAY_WIDTH
-            val unitHeight = size.height / DISPLAY_HEIGHT
-            underlying.forEachIndexed { column, columns ->
-                columns.forEachIndexed { row, cell ->
-                    drawRect(
-                        color = Color.Black.copy(alpha = cell.value.toFloat() / UByte.MAX_VALUE.toFloat()),
-                        topLeft = Offset(column * unitWidth, row * unitHeight),
-                        size = Size(unitWidth + 1, unitHeight + 1) // + 1 Removes gaps between cells
-                    )
-                }
-            }
-        }
-    }
-
+    fun renderState(): Array<Array<State<UByte>>> =
+        underlying.map { it.map { it as State<UByte> }.toTypedArray() }.toTypedArray()
 }

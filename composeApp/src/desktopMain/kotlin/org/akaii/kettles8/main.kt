@@ -1,15 +1,11 @@
 package org.akaii.kettles8
 
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.MaterialTheme
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.window.MenuBar
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.application
-import androidx.compose.ui.window.rememberWindowState
+import androidx.compose.ui.window.*
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.vinceglb.filekit.core.FileKit
 import io.github.vinceglb.filekit.core.PickerMode
@@ -18,6 +14,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.akaii.kettles8.EmulatorApp.emulator
+import org.akaii.kettles8.emulator.ui.*
 import org.akaii.kettles8.rom.ROMLoader
 import org.akaii.kettles8.ui.WindowKeypad
 import kotlin.io.path.Path
@@ -44,7 +41,7 @@ class DesktopApp {
                 height = Dp.Unspecified
             )
         ) {
-            MaterialTheme {
+            MaterialTheme(colors = darkColors()) {
                 MenuBar {
                     Menu("File", mnemonic = 'F') {
                         Item("ROM") {
@@ -52,9 +49,11 @@ class DesktopApp {
                         }
                     }
                 }
-                Row(modifier = Modifier.wrapContentSize()) {
-                    emulator.display.render()
-                    WindowKeypad(emulator.keypad::onDown, emulator.keypad::onUp)
+                Column(modifier = Modifier.wrapContentSize()) {
+                    Row(modifier = Modifier.wrapContentSize()) {
+                        DisplayPanel(emulator.display)
+                        WindowKeypad(emulator.keypad::onDown, emulator.keypad::onUp)
+                    }
                 }
             }
         }
