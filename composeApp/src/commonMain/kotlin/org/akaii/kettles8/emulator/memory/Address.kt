@@ -16,6 +16,7 @@ object Address {
     const val ROM_START: UShort = 0x200u
     const val ROM_END: UShort = 0xFFFu
 
+    val RESERVED_BLOCK: IntRange = RESERVED_START.toInt()..RESERVED_END.toInt()
     val FONT_BLOCK: IntRange = FONT_START.toInt()..FONT_END.toInt()
     val ROM_BLOCK: IntRange = ROM_START.toInt()..ROM_END.toInt()
 

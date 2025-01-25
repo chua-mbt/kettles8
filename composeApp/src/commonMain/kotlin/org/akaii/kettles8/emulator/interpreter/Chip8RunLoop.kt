@@ -42,15 +42,25 @@ class Chip8RunLoop : Interpreter {
         if (keypad.futureInput.isPending()) {
             keypad.futureInput.checkInput(keypad)
         } else {
-            if (cpu.running/* && cpu.cycles < 40*/) {
+            if (cpu.running/* && cpu.cycles < 5*/) {
                 cpu.cycles += 1
                 val instruction = fetchInstruction(cpu, memory)
-                logger.debug { instruction.description() }
                 cpu.advanceProgram()
                 instruction.execute(cpu, memory, display, keypad)
                 keypad.clearPrevious()
+                logCycle(instruction, cpu)
             }
         }
+    }
+
+    private fun logCycle(instruction: Instruction, cpu: CPU) {
+        val debugForCycle = listOf(
+            "",
+            "*".repeat(30),
+            instruction.description(),
+            cpu.toString(),
+        )
+        logger.debug { debugForCycle.joinToString("\n") }
     }
 
     override fun stop() {
@@ -58,5 +68,5 @@ class Chip8RunLoop : Interpreter {
     }
 
     fun fetchInstruction(cpu: CPU, memory: Memory): Instruction =
-        Instruction.Companion.decode(memory[cpu.programCounter])
+        Instruction.Companion.decode(memory.getInstruction(cpu.programCounter))
 }

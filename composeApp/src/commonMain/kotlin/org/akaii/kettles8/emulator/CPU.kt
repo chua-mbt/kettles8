@@ -1,5 +1,6 @@
 package org.akaii.kettles8.emulator
 
+import org.akaii.kettles8.emulator.format.Hex
 import org.akaii.kettles8.emulator.instructions.Instruction.Companion.INSTRUCTION_SIZE
 import org.akaii.kettles8.emulator.memory.Address
 import org.akaii.kettles8.emulator.memory.Registers
@@ -32,8 +33,8 @@ class CPU {
     }
 
     fun updateTimers() {
-        if(delayTimer > 0u) delayTimer--
-        if(soundTimer > 0u) soundTimer--
+        if (delayTimer > 0u) delayTimer--
+        if (soundTimer > 0u) soundTimer--
     }
 
     fun reset() {
@@ -45,5 +46,28 @@ class CPU {
         soundTimer = 0u
         running = false
         cycles = 0
+    }
+
+    override fun toString(): String {
+        return buildString {
+            append("\nCPU\n")
+            append("---------\n")
+
+            append(String.format("%-15s: %-4s\n", "PC", programCounter.toHexString(Hex.UI16_FORMAT)))
+            append(String.format("%-15s: %-4s\n", "I", indexRegister.toHexString(Hex.UI16_FORMAT)))
+            append(String.format("%-15s: %-4s\n", "Delay Timer", delayTimer))
+            append(String.format("%-15s: %-4s\n", "Sound Timer", soundTimer))
+
+            // Stack: Displaying stack with the same formatting
+            append(
+                String.format(
+                    "%-15s: %-4s\n",
+                    "Stack",
+                    stack.joinToString(", ") { it.toHexString(Hex.UI16_FORMAT) }
+                )
+            )
+            append(registers.toString())
+            append("\n")
+        }
     }
 }

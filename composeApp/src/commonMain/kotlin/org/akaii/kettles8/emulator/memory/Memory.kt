@@ -1,6 +1,8 @@
 package org.akaii.kettles8.emulator.memory
 
 import org.akaii.kettles8.emulator.display.DefaultFont
+import org.akaii.kettles8.emulator.format.Hex
+import org.akaii.kettles8.emulator.format.StdoutColors
 
 class Memory {
 
@@ -32,7 +34,7 @@ class Memory {
     fun slice(addressRange: IntRange): UByteArray =
         underlying.slice(addressRange).toUByteArray()
 
-    operator fun get(byteAddress: UShort): UShort {
+    fun getInstruction(byteAddress: UShort): UShort {
         val significantByteAddress = byteAddress
         val remainingByteAddress = significantByteAddress + 1u
         val significantByte = underlying[significantByteAddress.toInt()]
@@ -41,8 +43,37 @@ class Memory {
         return fetched.toUShort()
     }
 
+    operator fun get(byteAddress: UInt): UByte = underlying[byteAddress.toInt()]
     operator fun get(byteAddress: UByte): UByte = underlying[byteAddress.toInt()]
-    operator fun set(byteAddress: UByte, value: UByte) {
+    operator fun set(byteAddress: UInt, value: UByte) {
         underlying[byteAddress.toInt()] = value
+    }
+    operator fun set(byteAddress: UShort, value: UByte) {
+        set(byteAddress.toUInt(), value)
+    }
+
+    override fun toString(): String {
+        return buildString {
+            append("\nMemory\n")
+            append("--------\n")
+
+            for (i in underlying.indices) {
+                val value = underlying[i]
+                val hexValue = value.toHexString(Hex.UI8_FORMAT)
+
+                val colorCode = when (i) {
+                    in Address.FONT_BLOCK -> StdoutColors.LIGHT_BLUE
+                    in Address.ROM_BLOCK -> StdoutColors.LIGHT_GREEN
+                    else -> StdoutColors.GRAY
+                }
+
+                append(colorCode)
+                append(hexValue)
+                append(StdoutColors.DEFAULT)
+
+                if ((i + 1) % 32 == 0) append("\n")
+                else append(" ")
+            }
+        }
     }
 }

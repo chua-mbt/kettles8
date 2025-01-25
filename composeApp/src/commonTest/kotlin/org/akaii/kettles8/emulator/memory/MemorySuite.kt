@@ -34,6 +34,6 @@ class MemorySuite : FunSpec({
         romBlock.take(loadedRom.size) shouldBe loadedRom
         romBlock.drop(loadedRom.size) shouldContainOnly listOf(0u)
 
-        memory[Address.ROM_START] shouldBe 0x00E0u
+        memory.getInstruction(Address.ROM_START) shouldBe 0x00E0u
     }
 })

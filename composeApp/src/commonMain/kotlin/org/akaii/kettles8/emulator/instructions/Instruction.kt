@@ -479,7 +479,7 @@ class DRW_VX_VY(override val value: UShort) : Instruction(value), VXMask, VYMask
         for (spriteByteAddress in memStart..<memEnd) {
             val offSetY = spriteByteAddress - memStart
             val displayY = screenWrap(startY + offSetY, Display.DISPLAY_HEIGHT)
-            val spriteByte = memory[spriteByteAddress.toUByte()]
+            val spriteByte = memory[spriteByteAddress]
             for (offsetX in 0..<8) {
                 val displayX = screenWrap(startX + offsetX.toUInt(), Display.DISPLAY_WIDTH)
                 val spriteBit = Display.normalize(spriteByte and (0x80u shr offsetX).toUByte())
@@ -610,9 +610,9 @@ class LD_F_VX(override val value: UShort) : Instruction(value), VXMask {
 class LD_B_VX(override val value: UShort) : Instruction(value), VXMask {
     override fun execute(cpu: CPU, memory: Memory, display: Display, keypad: Keypad) {
         val vxContents = cpu.registers[vX]
-        memory[(cpu.indexRegister + 2u).toUByte()] = (vxContents.mod(10u)).toUByte()
-        memory[(cpu.indexRegister + 1u).toUByte()] = (vxContents.div(10u).mod(10u)).toUByte()
-        memory[(cpu.indexRegister).toUByte()] = (vxContents.div(100u).mod(10u)).toUByte()
+        memory[cpu.indexRegister + 2u] = (vxContents.mod(10u)).toUByte()
+        memory[cpu.indexRegister + 1u] = (vxContents.div(10u).mod(10u)).toUByte()
+        memory[cpu.indexRegister] = (vxContents.div(100u).mod(10u)).toUByte()
     }
 
     override fun description(): String =
@@ -628,7 +628,7 @@ class LD_I_VX(override val value: UShort) : Instruction(value), VXMask {
         val registersToVX = Register.V0..vX
         for (register in registersToVX) {
             val memoryAddress = cpu.indexRegister + register.value.toUShort()
-            memory[memoryAddress.toUByte()] = cpu.registers[register]
+            memory[memoryAddress] = cpu.registers[register]
         }
     }
 

@@ -397,9 +397,9 @@ class InstructionSuite : FunSpec({
 
         val emulator = Emulator()
 
-        emulator.memory[0x200u.toUByte()] = 0b11100000u
-        emulator.memory[0x201u.toUByte()] = 0b10100000u
-        emulator.memory[0x202u.toUByte()] = 0b11100000u
+        emulator.memory[0x200u] = 0b11100000u
+        emulator.memory[0x201u] = 0b10100000u
+        emulator.memory[0x202u] = 0b11100000u
 
         emulator.cpu.registers[V1] = 5u
         emulator.cpu.registers[V2] = 10u
@@ -428,9 +428,9 @@ class InstructionSuite : FunSpec({
 
         val emulator = Emulator()
 
-        emulator.memory[0x200u.toUByte()] = 0b11100000u
-        emulator.memory[0x201u.toUByte()] = 0b10100000u
-        emulator.memory[0x202u.toUByte()] = 0b11100000u
+        emulator.memory[0x200u] = 0b11100000u
+        emulator.memory[0x201u] = 0b10100000u
+        emulator.memory[0x202u] = 0b11100000u
 
         emulator.cpu.registers[V1] = 62u
         emulator.cpu.registers[V2] = 30u
@@ -459,9 +459,9 @@ class InstructionSuite : FunSpec({
 
         val emulator = Emulator()
 
-        emulator.memory[0x200u.toUByte()] = 0b11100000u
-        emulator.memory[0x201u.toUByte()] = 0b10100000u
-        emulator.memory[0x202u.toUByte()] = 0b11100000u
+        emulator.memory[0x200u] = 0b11100000u
+        emulator.memory[0x201u] = 0b10100000u
+        emulator.memory[0x202u] = 0b11100000u
 
         emulator.cpu.registers[V1] = 62u
         emulator.cpu.registers[V2] = 30u
@@ -678,7 +678,7 @@ class InstructionSuite : FunSpec({
 
         val emulator = Emulator()
         for (vx in V0..VA) {
-            emulator.memory[(10 + vx.value).toUByte()] = vx.value.toUByte()
+            emulator.memory[10u + vx.value.toUInt()] = vx.value.toUByte()
         }
         emulator.cpu.indexRegister = 0x000Au
         emulator.cpu.registers.toList() shouldContainOnly (listOf(0u))
