@@ -2,18 +2,20 @@ package org.akaii.kettles8
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.*
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.github.vinceglb.filekit.core.FileKit
-import io.github.vinceglb.filekit.core.PickerMode
-import io.github.vinceglb.filekit.core.PickerType
+import io.github.vinceglb.filekit.core.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.akaii.kettles8.EmulatorApp.emulator
+import org.akaii.kettles8.emulator.display.ColorSet
 import org.akaii.kettles8.emulator.ui.*
 import org.akaii.kettles8.rom.ROMLoader
 import org.akaii.kettles8.ui.WindowKeypad
@@ -48,6 +50,16 @@ class DesktopApp {
                             pickRom()
                         }
                     }
+                    Menu("Themes", mnemonic = 'T') {
+                        val selected: State<ColorSet> = remember { emulator.display.colorState() }
+                        ColorSet.values.forEach { colorSet ->
+                            Item(
+                                text = colorSet.name,
+                                onClick = { emulator.display.setColorSet(colorSet) },
+                                icon = if (selected.value == colorSet) rememberVectorPainter(Icons.Default.Check) else null,
+                            )
+                        }
+                    }
                 }
                 Column(modifier = Modifier.wrapContentSize()) {
                     Row(modifier = Modifier.wrapContentSize()) {
@@ -66,7 +78,7 @@ class DesktopApp {
                 mode = PickerMode.Single
             )
 
-            logger.debug{ "Picked file: $file" }
+            logger.debug { "Picked file: $file" }
 
             file?.path?.let {
                 val rom = ROMLoader(Path(it)).load()

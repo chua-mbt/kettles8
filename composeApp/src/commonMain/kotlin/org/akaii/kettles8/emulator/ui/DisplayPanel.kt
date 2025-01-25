@@ -21,12 +21,14 @@ fun DisplayPanel(display: Display) {
     Canvas(
         modifier = Modifier.size(DISPLAY_WIDTH_DP.dp, DISPLAY_HEIGHT_DP.dp).background(Color.White),
     ) {
+        val colorSet = display.getColorSet()
         val unitWidth = size.width / DISPLAY_WIDTH
         val unitHeight = size.height / DISPLAY_HEIGHT
         display.renderState().forEachIndexed { column, columns ->
             columns.forEachIndexed { row, cell ->
+                val color = if (Display.isOn(cell.value)) colorSet.pixel else colorSet.background
                 drawRect(
-                    color = Color.Black.copy(alpha = cell.value.toFloat() / UByte.MAX_VALUE.toFloat()),
+                    color = color,
                     topLeft = Offset(column * unitWidth, row * unitHeight),
                     size = Size(unitWidth + 1, unitHeight + 1) // + 1 Removes gaps between cells
                 )
