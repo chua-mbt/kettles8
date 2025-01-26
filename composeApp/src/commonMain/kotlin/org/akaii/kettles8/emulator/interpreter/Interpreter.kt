@@ -7,6 +7,6 @@ import org.akaii.kettles8.emulator.memory.Memory
 
 interface Interpreter {
     fun start(cpu: CPU, memory: Memory, display: Display, keypad: Keypad)
-    fun stop()
+    fun cleanup()
 }
 

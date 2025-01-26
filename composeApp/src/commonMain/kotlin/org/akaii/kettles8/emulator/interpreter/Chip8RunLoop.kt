@@ -63,7 +63,7 @@ class Chip8RunLoop : Interpreter {
         logger.debug { debugForCycle.joinToString("\n") }
     }
 
-    override fun stop() {
+    override fun cleanup() {
         executor.shutdownNow()
     }
 

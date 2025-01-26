@@ -26,4 +26,9 @@ class Emulator(
         memory.setFromROM(rom)
         cpu.running = true
     }
+
+    override fun cleanup() {
+        interpreter.cleanup()
+        cpu.cleanup()
+    }
 }

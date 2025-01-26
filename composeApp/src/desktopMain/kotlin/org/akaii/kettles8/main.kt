@@ -14,7 +14,7 @@ import io.github.vinceglb.filekit.core.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.akaii.kettles8.EmulatorApp.emulator
+import org.akaii.kettles8.beep.DesktopBeep
 import org.akaii.kettles8.emulator.display.ColorSet
 import org.akaii.kettles8.emulator.ui.*
 import org.akaii.kettles8.rom.ROMLoader
@@ -25,13 +25,14 @@ fun main() = DesktopApp().start()
 
 class DesktopApp {
 
+    private val app = Application(beep = DesktopBeep())
     private val logger = KotlinLogging.logger {}
 
     fun start() = application {
         DisposableEffect(Unit) {
-            EmulatorApp.start(EmulatorApp.AppMode.EMULATE)
+            app.start(Application.AppMode.BEEP_TEST)
             onDispose {
-                emulator.stop()
+                app.emulator.cleanup()
             }
         }
         Window(
@@ -51,11 +52,11 @@ class DesktopApp {
                         }
                     }
                     Menu("Themes", mnemonic = 'T') {
-                        val selected: State<ColorSet> = remember { emulator.display.colorState() }
+                        val selected: State<ColorSet> = remember { app.emulator.display.colorState() }
                         ColorSet.values.forEach { colorSet ->
                             Item(
                                 text = colorSet.name,
-                                onClick = { emulator.display.setColorSet(colorSet) },
+                                onClick = { app.emulator.display.setColorSet(colorSet) },
                                 icon = if (selected.value == colorSet) rememberVectorPainter(Icons.Default.Check) else null,
                             )
                         }
@@ -63,8 +64,8 @@ class DesktopApp {
                 }
                 Column(modifier = Modifier.wrapContentSize()) {
                     Row(modifier = Modifier.wrapContentSize()) {
-                        DisplayPanel(emulator.display)
-                        WindowKeypad(emulator.keypad::onDown, emulator.keypad::onUp)
+                        DisplayPanel(app.emulator.display)
+                        WindowKeypad(app.emulator.keypad::onDown, app.emulator.keypad::onUp)
                     }
                 }
             }
@@ -82,7 +83,7 @@ class DesktopApp {
 
             file?.path?.let {
                 val rom = ROMLoader(Path(it)).load()
-                emulator.loadRom(rom)
+                app.emulator.loadRom(rom)
             }
         }
     }

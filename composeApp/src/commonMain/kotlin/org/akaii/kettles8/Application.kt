@@ -1,15 +1,18 @@
 package org.akaii.kettles8
 
+import org.akaii.kettles8.emulator.CPU
 import org.akaii.kettles8.emulator.Emulator
+import org.akaii.kettles8.emulator.beep.Beep
 import org.akaii.kettles8.emulator.instructions.Instruction
 import org.akaii.kettles8.emulator.memory.Address
 import org.akaii.kettles8.emulator.memory.Registers
 
-object EmulatorApp {
-    val emulator = Emulator()
+class Application(beep: Beep) {
+    val emulator = Emulator(cpu = CPU(beep))
+        get() = field
 
     enum class AppMode {
-        FONT_TEST, FONT_WRAP_TEST, SPRITE_TEST, EMULATE
+        FONT_TEST, FONT_WRAP_TEST, SPRITE_TEST, BEEP_TEST, EMULATE
     }
 
     fun start(mode: AppMode) {
@@ -41,6 +44,11 @@ object EmulatorApp {
                 emulator.cpu.indexRegister = 0x200u
                 Instruction.decode(0xD123u)
                     .execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
+            }
+
+            AppMode.BEEP_TEST -> {
+                emulator.cpu.soundTimer = 20u
+                emulator.start(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
             }
 
             AppMode.EMULATE ->
