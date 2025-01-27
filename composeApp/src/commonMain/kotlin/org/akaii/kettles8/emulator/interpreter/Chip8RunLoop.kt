@@ -1,7 +1,7 @@
 package org.akaii.kettles8.emulator.interpreter
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.akaii.kettles8.emulator.Cpu
+import org.akaii.kettles8.emulator.cpu.Cpu
 import org.akaii.kettles8.emulator.display.Display
 import org.akaii.kettles8.emulator.input.Keypad
 import org.akaii.kettles8.emulator.instructions.Instruction

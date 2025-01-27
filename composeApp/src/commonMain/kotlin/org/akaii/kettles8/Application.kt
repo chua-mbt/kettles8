@@ -1,6 +1,6 @@
 package org.akaii.kettles8
 
-import org.akaii.kettles8.emulator.Cpu
+import org.akaii.kettles8.emulator.cpu.Cpu
 import org.akaii.kettles8.emulator.Emulator
 import org.akaii.kettles8.emulator.beep.Beep
 import org.akaii.kettles8.emulator.instructions.Instruction

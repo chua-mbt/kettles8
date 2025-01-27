@@ -1,6 +1,6 @@
 package org.akaii.kettles8.emulator.instructions
 
-import org.akaii.kettles8.emulator.Cpu
+import org.akaii.kettles8.emulator.cpu.Cpu
 import org.akaii.kettles8.emulator.display.*
 import org.akaii.kettles8.emulator.format.Hex.UI16_FORMAT
 import org.akaii.kettles8.emulator.format.Hex.UI8_FORMAT

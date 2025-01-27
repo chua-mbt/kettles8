@@ -1,5 +1,6 @@
 package org.akaii.kettles8.emulator
 
+import org.akaii.kettles8.emulator.cpu.Cpu
 import org.akaii.kettles8.emulator.display.Display
 import org.akaii.kettles8.emulator.input.Keypad
 import org.akaii.kettles8.emulator.interpreter.Chip8RunLoop

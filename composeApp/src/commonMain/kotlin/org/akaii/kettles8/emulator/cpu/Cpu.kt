@@ -1,9 +1,11 @@
-package org.akaii.kettles8.emulator
+package org.akaii.kettles8.emulator.cpu
 
-import org.akaii.kettles8.emulator.beep.*
+import org.akaii.kettles8.emulator.beep.Beep
+import org.akaii.kettles8.emulator.beep.NoBeep
 import org.akaii.kettles8.emulator.format.Hex
-import org.akaii.kettles8.emulator.instructions.Instruction.Companion.INSTRUCTION_SIZE
-import org.akaii.kettles8.emulator.memory.*
+import org.akaii.kettles8.emulator.instructions.Instruction
+import org.akaii.kettles8.emulator.memory.Address
+import org.akaii.kettles8.emulator.memory.Registers
 
 class Cpu(private val beep: Beep = NoBeep()) {
     companion object {
@@ -29,7 +31,7 @@ class Cpu(private val beep: Beep = NoBeep()) {
     var cycles: Int = 0
 
     fun advanceProgram() {
-        programCounter = (programCounter + INSTRUCTION_SIZE).toUShort()
+        programCounter = (programCounter + Instruction.Companion.INSTRUCTION_SIZE).toUShort()
     }
 
     fun updateTimers() {

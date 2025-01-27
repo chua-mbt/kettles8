@@ -1,6 +1,6 @@
 package org.akaii.kettles8.emulator.interpreter
 
-import org.akaii.kettles8.emulator.Cpu
+import org.akaii.kettles8.emulator.cpu.Cpu
 import org.akaii.kettles8.emulator.display.Display
 import org.akaii.kettles8.emulator.input.Keypad
 import org.akaii.kettles8.emulator.memory.Memory
