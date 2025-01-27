@@ -678,12 +678,12 @@ class InstructionSuite : FunSpec({
 
         val emulator = Emulator()
         for (vx in V0..VA) {
-            emulator.memory[10u + vx.value.toUInt()] = vx.value.toUByte()
+            emulator.memory[511u + vx.value.toUInt()] = vx.value.toUByte()
         }
-        emulator.cpu.indexRegister = 0x000Au
+        emulator.cpu.indexRegister = 0x01FFu // 511 in hex
         emulator.cpu.registers.toList() shouldContainOnly (listOf(0u))
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
-        emulator.cpu.registers.toList().toUByteArray() shouldBe emulator.memory.slice(10..25)
+        emulator.cpu.registers.toList().toUByteArray() shouldBe emulator.memory.slice(511..526)
 
         instruction.description() shouldEndWith "LD_VX_I VA"
     }

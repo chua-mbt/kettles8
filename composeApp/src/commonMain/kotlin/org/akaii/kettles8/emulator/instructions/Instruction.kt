@@ -645,7 +645,7 @@ class LD_VX_I(override val value: UShort) : Instruction(value), VXMask {
         val registersToVX = Register.V0..vX
         for (register in registersToVX) {
             val memoryAddress = cpu.indexRegister + register.value.toUShort()
-            cpu.registers[register] = memory[memoryAddress.toUByte()]
+            cpu.registers[register] = memory[memoryAddress]
         }
     }
 
