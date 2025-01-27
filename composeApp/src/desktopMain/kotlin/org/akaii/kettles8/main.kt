@@ -30,7 +30,7 @@ class DesktopApp {
 
     fun start() = application {
         DisposableEffect(Unit) {
-            app.start(Application.AppMode.BEEP_TEST)
+            app.start(Application.AppMode.EMULATE)
             onDispose {
                 app.emulator.cleanup()
             }
