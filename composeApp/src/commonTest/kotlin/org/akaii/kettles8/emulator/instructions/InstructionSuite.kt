@@ -26,13 +26,16 @@ class InstructionSuite : FunSpec({
     test("RET") {
         val instruction = Instruction.decode(0x00EEu)
         instruction shouldBe RET
+        val expectedAddress: UShort = 0x0400u
 
         val emulator = Emulator()
-        emulator.cpu.stack.addLast(0x0200u)
+        emulator.cpu.stack.addLast(expectedAddress)
+        emulator.cpu.programCounter shouldNotBe expectedAddress
         emulator.cpu.stack.shouldNotBeEmpty()
 
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.stack.shouldBeEmpty()
+        emulator.cpu.programCounter shouldBe expectedAddress
     }
 
     test("JP") {

@@ -151,7 +151,7 @@ object CLS : Instruction(0x00E0u) {
  */
 object RET : Instruction(0x00EEu) {
     override fun execute(cpu: CPU, memory: Memory, display: Display, keypad: Keypad) {
-        cpu.stack.removeLast()
+        cpu.programCounter = cpu.stack.removeLast()
     }
 }
 
