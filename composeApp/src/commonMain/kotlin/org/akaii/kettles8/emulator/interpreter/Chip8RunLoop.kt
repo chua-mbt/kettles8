@@ -1,7 +1,7 @@
 package org.akaii.kettles8.emulator.interpreter
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.akaii.kettles8.emulator.CPU
+import org.akaii.kettles8.emulator.Cpu
 import org.akaii.kettles8.emulator.display.Display
 import org.akaii.kettles8.emulator.input.Keypad
 import org.akaii.kettles8.emulator.instructions.Instruction
@@ -22,7 +22,7 @@ class Chip8RunLoop : Interpreter {
     private val logger = KotlinLogging.logger {}
 
     override fun start(
-        cpu: CPU,
+        cpu: Cpu,
         memory: Memory,
         display: Display,
         keypad: Keypad
@@ -38,7 +38,7 @@ class Chip8RunLoop : Interpreter {
         )
     }
 
-    private fun cpuTick(cpu: CPU, memory: Memory, display: Display, keypad: Keypad) {
+    private fun cpuTick(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
         if (keypad.futureInput.isPending()) {
             keypad.futureInput.checkInput(keypad)
         } else {
@@ -53,7 +53,7 @@ class Chip8RunLoop : Interpreter {
         }
     }
 
-    private fun logCycle(instruction: Instruction, cpu: CPU) {
+    private fun logCycle(instruction: Instruction, cpu: Cpu) {
         val debugForCycle = listOf(
             "",
             "*".repeat(30),
@@ -67,6 +67,6 @@ class Chip8RunLoop : Interpreter {
         executor.shutdownNow()
     }
 
-    fun fetchInstruction(cpu: CPU, memory: Memory): Instruction =
+    fun fetchInstruction(cpu: Cpu, memory: Memory): Instruction =
         Instruction.Companion.decode(memory.getInstruction(cpu.programCounter))
 }

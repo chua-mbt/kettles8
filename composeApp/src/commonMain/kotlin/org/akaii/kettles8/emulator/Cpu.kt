@@ -1,13 +1,11 @@
 package org.akaii.kettles8.emulator
 
-import org.akaii.kettles8.emulator.beep.Beep
-import org.akaii.kettles8.emulator.beep.NoBeep
+import org.akaii.kettles8.emulator.beep.*
 import org.akaii.kettles8.emulator.format.Hex
 import org.akaii.kettles8.emulator.instructions.Instruction.Companion.INSTRUCTION_SIZE
-import org.akaii.kettles8.emulator.memory.Address
-import org.akaii.kettles8.emulator.memory.Registers
+import org.akaii.kettles8.emulator.memory.*
 
-class CPU(private val beep: Beep = NoBeep()) {
+class Cpu(private val beep: Beep = NoBeep()) {
     companion object {
         private const val STACK_SIZE = 16
     }

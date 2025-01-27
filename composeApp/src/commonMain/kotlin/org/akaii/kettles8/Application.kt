@@ -1,6 +1,6 @@
 package org.akaii.kettles8
 
-import org.akaii.kettles8.emulator.CPU
+import org.akaii.kettles8.emulator.Cpu
 import org.akaii.kettles8.emulator.Emulator
 import org.akaii.kettles8.emulator.beep.Beep
 import org.akaii.kettles8.emulator.instructions.Instruction
@@ -8,7 +8,7 @@ import org.akaii.kettles8.emulator.memory.Address
 import org.akaii.kettles8.emulator.memory.Registers
 
 class Application(beep: Beep) {
-    val emulator = Emulator(cpu = CPU(beep))
+    val emulator = Emulator(cpu = Cpu(beep))
         get() = field
 
     enum class AppMode {

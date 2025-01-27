@@ -7,7 +7,7 @@ import org.akaii.kettles8.emulator.interpreter.Interpreter
 import org.akaii.kettles8.emulator.memory.Memory
 
 class Emulator(
-    val cpu: CPU = CPU(),
+    val cpu: Cpu = Cpu(),
     val memory: Memory = Memory(),
     val display: Display = Display(),
     val keypad: Keypad = Keypad(),
