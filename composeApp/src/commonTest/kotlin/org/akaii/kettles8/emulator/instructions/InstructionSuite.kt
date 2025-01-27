@@ -7,10 +7,58 @@ import io.kotest.matchers.string.*
 import io.kotest.matchers.types.*
 import org.akaii.kettles8.emulator.Emulator
 import org.akaii.kettles8.emulator.input.Keypad.Companion.Key
-import org.akaii.kettles8.emulator.memory.Address
+import org.akaii.kettles8.emulator.memory.*
 import org.akaii.kettles8.emulator.memory.Registers.Companion.Register.*
 
 class InstructionSuite : FunSpec({
+    test("AddressMask") {
+        val withAddressMask = object : AddressMask {
+            override val value: UShort
+                get() = 0xF123u
+        }
+
+        withAddressMask.target shouldBe 0x123u
+    }
+
+    test("VXMask") {
+        for(register in Registers.Companion.Register.entries) {
+            val withVXMask = object : VXMask {
+                override val value: UShort
+                    get() = (0xF023u or (register.value.toUInt() shl 8)).toUShort()
+            }
+            withVXMask.vX shouldBe register
+        }
+    }
+
+    test("VYMask") {
+        for(register in Registers.Companion.Register.entries) {
+            val withVYMask = object : VYMask {
+                override val value: UShort
+                    get() = (0xF203u or (register.value.toUInt() shl 4)).toUShort()
+            }
+            withVYMask.vY shouldBe register
+        }
+    }
+
+    test("NMask") {
+        val withNMask = object : NMask {
+            override val value: UShort
+                get() = 0xF123u
+        }
+
+        withNMask.nC shouldBe 0x3u
+    }
+
+    test("ByteMask") {
+        val withByteMask = object : ByteMask {
+            override val value: UShort
+                get() = 0xF123u
+        }
+
+        withByteMask.byteC shouldBe 0x23u
+    }
+
+
     test("CLS") {
         val instruction = Instruction.decode(0x00E0u)
         instruction shouldBe CLS
