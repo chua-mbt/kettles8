@@ -7,6 +7,10 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.*
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -73,7 +77,14 @@ class DesktopApp {
                         }
                     }
                 }
-                Column(modifier = Modifier.wrapContentSize()) {
+                Column(modifier = Modifier.wrapContentSize().onKeyEvent { keyEvent ->
+                    val composeKey = keyEvent.key
+                    when (keyEvent.type) {
+                        KeyEventType.KeyUp -> app.emulator.keypad.onUp(composeKey, app.emulator.keypad.getConfig())
+                        KeyEventType.KeyDown -> app.emulator.keypad.onDown(composeKey, app.emulator.keypad.getConfig())
+                        else -> null
+                    } == true
+                }) {
                     Row(modifier = Modifier.wrapContentSize()) {
                         DisplayPanel(app.emulator.display)
                         WindowKeypad(
