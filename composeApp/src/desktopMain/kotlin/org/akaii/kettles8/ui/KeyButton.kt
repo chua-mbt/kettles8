@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.akaii.kettles8.emulator.display.Display
 import org.akaii.kettles8.emulator.input.Keypad.Companion.Config
 import org.akaii.kettles8.emulator.input.Keypad.Companion.Key
@@ -34,7 +35,7 @@ object KeyButton {
             },
             colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray)
         ) {
-            Text(text = key.text(config), color = Color.White)
+            Text(text = key.text(config), color = Color.White, fontSize = 30.sp)
         }
     }
 }
