@@ -1,15 +1,13 @@
 package org.akaii.kettles8.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.akaii.kettles8.emulator.input.Keypad.Companion.Config
 import org.akaii.kettles8.emulator.input.Keypad.Companion.Key
 
 object WindowKeypad {
@@ -32,7 +30,7 @@ object WindowKeypad {
     }
 
     @Composable
-    operator fun invoke(onDown: (Key) -> Unit, onUp: (Key) -> Unit) {
+    operator fun invoke(config: Config, onDown: (Key) -> Unit, onUp: (Key) -> Unit) {
         Column(
             modifier = Modifier.wrapContentSize().background(Color.Gray),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -44,7 +42,7 @@ object WindowKeypad {
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     for (key in row) {
-                        KeyButton(key = key, logKey("Down")(onDown), logKey("Up")(onUp))
+                        KeyButton(config, key, logKey("Down")(onDown), logKey("Up")(onUp))
                     }
                 }
             }

@@ -41,7 +41,7 @@ class Display {
         underlying[row.toInt()][column.toInt()].value = normalize(value)
     }
 
-    fun colorState(): State<ColorSet> = colorSet
+    val colorState: State<ColorSet> get() = colorSet
     fun renderState(): Array<Array<State<UByte>>> =
         underlying.map { it.map { it as State<UByte> }.toTypedArray() }.toTypedArray()
 }

@@ -1,23 +1,40 @@
 package org.akaii.kettles8.emulator.input
 
+import androidx.compose.runtime.*
+
 class Keypad {
     companion object {
-        enum class Key(val value: UByte, val text: String) {
-            K0(0u, "0"), K1(1u, "1"), K2(2u, "2"), K3(3u, "3"),
-            K4(4u, "4"), K5(5u, "5"), K6(6u, "6"), K7(7u, "7"),
-            K8(8u, "8"), K9(9u, "9"), KA(10u, "A"), KB(11u, "B"),
-            KC(12u, "C"), KD(13u, "D"), KE(14u, "E"), KF(15u, "F");
+        enum class Config {
+            CLASSIC, QWERT
+        }
+
+        enum class Key(val value: UByte, val classic: String, val qwert: String) {
+            K0(0u, "0", "X"), K1(1u, "1", "1"), K2(2u, "2", "2"), K3(3u, "3", "3"),
+            K4(4u, "4", "Q"), K5(5u, "5", "W"), K6(6u, "6", "E"), K7(7u, "7", "A"),
+            K8(8u, "8", "S"), K9(9u, "9", "D"), KA(10u, "A", "Z"), KB(11u, "B", "C"),
+            KC(12u, "C", "4"), KD(13u, "D", "R"), KE(14u, "E", "F"), KF(15u, "F", "V");
 
             companion object {
                 fun ofValue(value: UByte): Key =
                     Key.entries[value.toInt()]
             }
+
+            fun text(config: Config): String = when (config) {
+                Config.CLASSIC -> classic
+                Config.QWERT -> qwert
+            }
         }
     }
 
+    private val config: MutableState<Config> = mutableStateOf(Config.CLASSIC)
     private val underlying: BooleanArray = BooleanArray(Key.entries.size)
     private val previous: BooleanArray = BooleanArray(Key.entries.size)
 
+    val configState: State<Config> get() = config
+    fun getConfig(): Config = config.value
+    fun setConfig(config: Config) {
+        this.config.value = config
+    }
     val futureInput: FutureInput = FutureInput()
 
     operator fun get(key: Key): Boolean = underlying[key.value.toInt()]

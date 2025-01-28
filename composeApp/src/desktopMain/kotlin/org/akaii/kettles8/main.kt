@@ -16,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.akaii.kettles8.beep.DesktopBeep
 import org.akaii.kettles8.emulator.display.ColorSet
+import org.akaii.kettles8.emulator.input.Keypad
 import org.akaii.kettles8.emulator.ui.*
 import org.akaii.kettles8.rom.ROMLoader
 import org.akaii.kettles8.ui.WindowKeypad
@@ -51,8 +52,18 @@ class DesktopApp {
                             pickRom()
                         }
                     }
+                    Menu("Keypad", mnemonic = 'K') {
+                        val selected: State<Keypad.Companion.Config> = remember { app.emulator.keypad.configState }
+                        Keypad.Companion.Config.entries.forEach { keypadConfig ->
+                            Item(
+                                text = keypadConfig.name,
+                                onClick = { app.emulator.keypad.setConfig(keypadConfig) },
+                                icon = if (selected.value == keypadConfig) rememberVectorPainter(Icons.Default.Check) else null,
+                            )
+                        }
+                    }
                     Menu("Themes", mnemonic = 'T') {
-                        val selected: State<ColorSet> = remember { app.emulator.display.colorState() }
+                        val selected: State<ColorSet> = remember { app.emulator.display.colorState }
                         ColorSet.values.forEach { colorSet ->
                             Item(
                                 text = colorSet.name,
@@ -65,7 +76,11 @@ class DesktopApp {
                 Column(modifier = Modifier.wrapContentSize()) {
                     Row(modifier = Modifier.wrapContentSize()) {
                         DisplayPanel(app.emulator.display)
-                        WindowKeypad(app.emulator.keypad::onDown, app.emulator.keypad::onUp)
+                        WindowKeypad(
+                            app.emulator.keypad.getConfig(),
+                            app.emulator.keypad::onDown,
+                            app.emulator.keypad::onUp
+                        )
                     }
                 }
             }
