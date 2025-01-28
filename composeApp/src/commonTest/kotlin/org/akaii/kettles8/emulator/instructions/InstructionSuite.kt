@@ -1,14 +1,17 @@
 package org.akaii.kettles8.emulator.instructions
 
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.matchers.collections.*
 import io.kotest.matchers.*
+import io.kotest.matchers.collections.*
+import io.kotest.matchers.doubles.*
 import io.kotest.matchers.string.*
 import io.kotest.matchers.types.*
+import io.kotest.property.checkAll
 import org.akaii.kettles8.emulator.Emulator
 import org.akaii.kettles8.emulator.input.Keypad.Companion.Key
 import org.akaii.kettles8.emulator.memory.*
 import org.akaii.kettles8.emulator.memory.Registers.Companion.Register.*
+import kotlin.math.ln
 
 class InstructionSuite : FunSpec({
     test("AddressMask") {
@@ -21,7 +24,7 @@ class InstructionSuite : FunSpec({
     }
 
     test("VXMask") {
-        for(register in Registers.Companion.Register.entries) {
+        for (register in Registers.Companion.Register.entries) {
             val withVXMask = object : VXMask {
                 override val value: UShort
                     get() = (0xF023u or (register.value.toUInt() shl 8)).toUShort()
@@ -31,7 +34,7 @@ class InstructionSuite : FunSpec({
     }
 
     test("VYMask") {
-        for(register in Registers.Companion.Register.entries) {
+        for (register in Registers.Companion.Register.entries) {
             val withVYMask = object : VYMask {
                 override val value: UShort
                     get() = (0xF203u or (register.value.toUInt() shl 4)).toUShort()
@@ -437,9 +440,61 @@ class InstructionSuite : FunSpec({
         emulator.cpu.registers[VA] shouldBe 0x00u
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.registers[VA] shouldNotBe 0x00u
-        // TODO: Properly test randomness?
 
         instruction.description() shouldEndWith "RND_VX VA, 0xBC"
+    }
+
+    test("RND_VX - Value Diversity") {
+        val emulator = Emulator()
+        val instruction = Instruction.decode(0xCAFFu)
+
+        checkAll<Unit>(10) { _ ->
+            val uniqueOutputs = mutableSetOf<UByte>()
+            repeat(1000){
+                instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
+                uniqueOutputs.add(emulator.cpu.registers[VA])
+            }
+            (uniqueOutputs.size / 255.0) shouldBeGreaterThan 0.90 // High diversity indicates good randomness
+        }
+    }
+
+    test("RND_VX - Shannon Entropy") {
+        val instruction = Instruction.decode(0xCAFFu)
+        val emulator = Emulator()
+        checkAll<Unit>(100) { _ ->
+            val outputs = mutableListOf<UByte>()
+            repeat(100){
+                instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
+                outputs.add(emulator.cpu.registers[VA])
+            }
+            // Shannon entropy calculation
+            val frequencies = outputs.groupingBy { it }.eachCount()
+            val probabilities = frequencies.mapValues { it.value.toDouble() / outputs.size }
+            val entropy = -probabilities.values.sumOf { p -> p * ln(p) }
+            entropy.shouldBeGreaterThan(4.0) // High entropy indicates good randomness
+        }
+    }
+
+    test("RND_VX - Uniform Distribution") {
+        val instruction = Instruction.decode(0xCAFFu)
+        val emulator = Emulator()
+        val totalSamples = 10_000
+        val counts = IntArray(256)
+
+        repeat(totalSamples) {
+            instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
+            val output = emulator.cpu.registers[VA].toInt()
+            counts[output]++
+        }
+
+        val expectedCount = totalSamples / 256.0
+        val chiSquare = counts.sumOf { observed ->
+            val diff = observed - expectedCount
+            (diff * diff) / expectedCount
+        }
+
+        val criticalValue = 293.25
+        chiSquare.shouldBeLessThan(criticalValue)
     }
 
     test("DRW_VX_VY") {
