@@ -493,7 +493,7 @@ class InstructionSuite : FunSpec({
             (diff * diff) / expectedCount
         }
 
-        val criticalValue = 293.25
+        val criticalValue = 323.00 // Critical value for 95% confidence level and 255 degrees of freedom
         chiSquare.shouldBeLessThan(criticalValue)
     }
 

@@ -38,7 +38,7 @@ class Chip8RunLoop : Interpreter {
         )
     }
 
-    private fun cpuTick(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    fun cpuTick(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
         if (keypad.futureInput.isPending()) {
             keypad.futureInput.checkInput(keypad)
         } else {
