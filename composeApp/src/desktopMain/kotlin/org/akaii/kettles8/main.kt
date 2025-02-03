@@ -7,10 +7,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.key.*
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.*
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -19,10 +16,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.akaii.kettles8.beep.DesktopBeep
-import org.akaii.kettles8.emulator.display.ColorSet
+import org.akaii.kettles8.ui.ColorSet
 import org.akaii.kettles8.emulator.input.Keypad
-import org.akaii.kettles8.emulator.ui.*
 import org.akaii.kettles8.rom.ROMLoader
+import org.akaii.kettles8.shaders.CRT
+import org.akaii.kettles8.shaders.KettlesShader
+import org.akaii.kettles8.ui.DisplayPanel
 import org.akaii.kettles8.ui.WindowKeypad
 import kotlin.io.path.Path
 
@@ -57,38 +56,49 @@ class DesktopApp {
                         }
                     }
                     Menu("Keypad", mnemonic = 'K') {
-                        val selected: State<Keypad.Companion.Config> = remember { app.emulator.keypad.configState }
-                        Keypad.Companion.Config.entries.forEach { keypadConfig ->
+                        val selected: State<Keypad.Companion.KeyConfig> = remember { app.config.keyConfigState }
+                        Keypad.Companion.KeyConfig.entries.forEach { keypadConfig ->
                             Item(
                                 text = keypadConfig.name,
-                                onClick = { app.emulator.keypad.setConfig(keypadConfig) },
+                                onClick = { app.config.setKeyConfig(keypadConfig) },
                                 icon = if (selected.value == keypadConfig) rememberVectorPainter(Icons.Default.Check) else null,
                             )
                         }
                     }
                     Menu("Themes", mnemonic = 'T') {
-                        val selected: State<ColorSet> = remember { app.emulator.display.colorState }
+                        val selected: State<ColorSet> = remember { app.config.colorState }
                         ColorSet.values.forEach { colorSet ->
                             Item(
                                 text = colorSet.name,
-                                onClick = { app.emulator.display.setColorSet(colorSet) },
+                                onClick = { app.config.setColorSet(colorSet) },
                                 icon = if (selected.value == colorSet) rememberVectorPainter(Icons.Default.Check) else null,
                             )
                         }
+                    }
+                    Menu("Shaders", mnemonic = 'S') {
+                        val selected: State<KettlesShader?> = remember { app.config.shaderState }
+                        Item(
+                            text = "CRT",
+                            onClick = {
+                                val newValue = if (selected.value == null) CRT else null
+                                app.config.setShader(newValue)
+                            },
+                            icon = if (selected.value != null) rememberVectorPainter(Icons.Default.Check) else null,
+                        )
                     }
                 }
                 Column(modifier = Modifier.wrapContentSize().onKeyEvent { keyEvent ->
                     val composeKey = keyEvent.key
                     when (keyEvent.type) {
-                        KeyEventType.KeyUp -> app.emulator.keypad.onUp(composeKey, app.emulator.keypad.getConfig())
-                        KeyEventType.KeyDown -> app.emulator.keypad.onDown(composeKey, app.emulator.keypad.getConfig())
+                        KeyEventType.KeyUp -> app.emulator.keypad.onUp(composeKey, app.config.getKeyConfig())
+                        KeyEventType.KeyDown -> app.emulator.keypad.onDown(composeKey, app.config.getKeyConfig())
                         else -> null
                     } == true
                 }) {
                     Row(modifier = Modifier.wrapContentSize()) {
-                        DisplayPanel(app.emulator.display)
+                        DisplayPanel(app.emulator.display, app.config)
                         WindowKeypad(
-                            app.emulator.keypad.getConfig(),
+                            app.config,
                             app.emulator.keypad::onDown,
                             app.emulator.keypad::onUp
                         )

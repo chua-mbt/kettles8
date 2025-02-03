@@ -17,14 +17,9 @@ class Display {
             pixel == UByte.MAX_VALUE
     }
 
-    private val colorSet: MutableState<ColorSet> = mutableStateOf(ColorSet.Grays)
     private val underlying: Array<Array<MutableState<UByte>>> =
         Array(DISPLAY_WIDTH) { Array(DISPLAY_HEIGHT) { mutableStateOf(0u) } }
 
-    fun getColorSet(): ColorSet = colorSet.value
-    fun setColorSet(colorSet: ColorSet) {
-        this.colorSet.value = colorSet
-    }
 
     fun fill() {
         underlying.forEach { it.forEach { cell -> cell.value = UByte.MAX_VALUE } }
@@ -41,7 +36,6 @@ class Display {
         underlying[row.toInt()][column.toInt()].value = normalize(value)
     }
 
-    val colorState: State<ColorSet> get() = colorSet
     fun renderState(): Array<Array<State<UByte>>> =
         underlying.map { it.map { it as State<UByte> }.toTypedArray() }.toTypedArray()
 }

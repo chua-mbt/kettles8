@@ -6,8 +6,9 @@ import org.akaii.kettles8.emulator.beep.Beep
 import org.akaii.kettles8.emulator.instructions.Instruction
 import org.akaii.kettles8.emulator.memory.Address
 import org.akaii.kettles8.emulator.memory.Registers
+import org.akaii.kettles8.ui.Config
 
-class Application(beep: Beep) {
+class Application(beep: Beep, val config: Config = Config()) {
     val emulator = Emulator(cpu = Cpu(beep))
         get() = field
 

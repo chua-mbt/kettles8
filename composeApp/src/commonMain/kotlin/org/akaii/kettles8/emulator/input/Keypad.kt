@@ -1,11 +1,10 @@
 package org.akaii.kettles8.emulator.input
 
-import androidx.compose.runtime.*
 import androidx.compose.ui.input.key.Key as ComposeKey
 
 class Keypad {
     companion object {
-        enum class Config {
+        enum class KeyConfig {
             CLASSIC, QWERT
         }
 
@@ -61,29 +60,22 @@ class Keypad {
                         else -> null
                     }
 
-                fun ofComposeKey(key: ComposeKey, config: Config): Key? =
+                fun ofComposeKey(key: ComposeKey, config: KeyConfig): Key? =
                     when (config) {
-                        Config.CLASSIC -> ofComposeKeyClassic(key)
-                        Config.QWERT -> ofComposeKeyQwert(key)
+                        KeyConfig.CLASSIC -> ofComposeKeyClassic(key)
+                        KeyConfig.QWERT -> ofComposeKeyQwert(key)
                     }
             }
 
-            fun text(config: Config): String = when (config) {
-                Config.CLASSIC -> classic
-                Config.QWERT -> qwert
+            fun text(config: KeyConfig): String = when (config) {
+                KeyConfig.CLASSIC -> classic
+                KeyConfig.QWERT -> qwert
             }
         }
     }
 
-    private val config: MutableState<Config> = mutableStateOf(Config.CLASSIC)
     private val underlying: BooleanArray = BooleanArray(Key.entries.size)
     private val previous: BooleanArray = BooleanArray(Key.entries.size)
-
-    val configState: State<Config> get() = config
-    fun getConfig(): Config = config.value
-    fun setConfig(config: Config) {
-        this.config.value = config
-    }
 
     val futureInput: FutureInput = FutureInput()
 
@@ -102,14 +94,14 @@ class Keypad {
         set(key, true)
     }
 
-    fun onDown(key: ComposeKey, config: Config): Boolean =
+    fun onDown(key: ComposeKey, config: KeyConfig): Boolean =
         Key.ofComposeKey(key, config)?.let { onDown(it); true } == true
 
     fun onUp(key: Key) {
         set(key, false)
     }
 
-    fun onUp(key: ComposeKey, config: Config): Boolean =
+    fun onUp(key: ComposeKey, config: KeyConfig): Boolean =
         Key.ofComposeKey(key, config)?.let { onUp(it); true } == true
 
     fun keyReleased(): Key? {

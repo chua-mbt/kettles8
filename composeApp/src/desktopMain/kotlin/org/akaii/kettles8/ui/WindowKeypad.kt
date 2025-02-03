@@ -6,7 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import org.akaii.kettles8.emulator.input.Keypad.Companion.Config
 import org.akaii.kettles8.emulator.input.Keypad.Companion.Key
 
 object WindowKeypad {
@@ -20,7 +19,7 @@ object WindowKeypad {
     @Composable
     operator fun invoke(config: Config, onDown: (Key) -> Unit, onUp: (Key) -> Unit) {
         Column(
-            modifier = Modifier.wrapContentSize().background(Color.Gray),
+            modifier = Modifier.wrapContentSize().background(Color(config.getColorSet().pixel)),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceEvenly
         ) {

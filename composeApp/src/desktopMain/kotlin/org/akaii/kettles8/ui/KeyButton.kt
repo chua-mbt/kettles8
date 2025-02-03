@@ -8,12 +8,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.akaii.kettles8.emulator.display.Display
-import org.akaii.kettles8.emulator.input.Keypad.Companion.Config
+import org.akaii.kettles8.emulator.display.Display.Companion.DISPLAY_HEIGHT_DP
 import org.akaii.kettles8.emulator.input.Keypad.Companion.Key
+import org.akaii.kettles8.shaders.KettlesShader.Companion.SHADER_PADDING_DP
 
 object KeyButton {
-    val KEYPAD_SIZE_DP = Display.Companion.DISPLAY_HEIGHT_DP / WindowKeypad.KEYS.size
+    val KEYPAD_SIZE_DP = (DISPLAY_HEIGHT_DP + SHADER_PADDING_DP)/ WindowKeypad.KEYS.size
 
     @Composable
     operator fun invoke(config: Config, key: Key, onDown: (Key) -> Unit, onUp: (Key) -> Unit) {
@@ -33,9 +33,9 @@ object KeyButton {
                     }
                 }
             },
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray)
+            colors = ButtonDefaults.buttonColors(backgroundColor = Color(config.getColorSet().pixel))
         ) {
-            Text(text = key.text(config), color = Color.White, fontSize = 30.sp)
+            Text(text = key.text(config.getKeyConfig()), color = Color(config.getColorSet().background), fontSize = 30.sp)
         }
     }
 }
