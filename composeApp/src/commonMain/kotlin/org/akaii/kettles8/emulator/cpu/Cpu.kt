@@ -2,7 +2,6 @@ package org.akaii.kettles8.emulator.cpu
 
 import org.akaii.kettles8.emulator.beep.Beep
 import org.akaii.kettles8.emulator.beep.NoBeep
-import org.akaii.kettles8.emulator.format.Hex
 import org.akaii.kettles8.emulator.instructions.Instruction
 import org.akaii.kettles8.emulator.memory.Address
 import org.akaii.kettles8.emulator.memory.Registers
@@ -29,6 +28,7 @@ class Cpu(private val beep: Beep = NoBeep()) {
 
     var running: Boolean = false
     var cycles: Int = 0
+    var instruction: Instruction? = null
 
     fun advanceProgram() {
         programCounter = (programCounter + Instruction.Companion.INSTRUCTION_SIZE).toUShort()
@@ -53,33 +53,11 @@ class Cpu(private val beep: Beep = NoBeep()) {
         soundTimer = 0u
         running = false
         cycles = 0
+        instruction = null
         beep.stop()
     }
 
     fun cleanup() {
         beep.cleanup()
-    }
-
-    override fun toString(): String {
-        return buildString {
-            append("\nCPU\n")
-            append("---------\n")
-
-            append(String.format("%-15s: %-4s\n", "PC", programCounter.toHexString(Hex.UI16_FORMAT)))
-            append(String.format("%-15s: %-4s\n", "I", indexRegister.toHexString(Hex.UI16_FORMAT)))
-            append(String.format("%-15s: %-4s\n", "Delay Timer", delayTimer))
-            append(String.format("%-15s: %-4s\n", "Sound Timer", soundTimer))
-
-            // Stack: Displaying stack with the same formatting
-            append(
-                String.format(
-                    "%-15s: %-4s\n",
-                    "Stack",
-                    stack.joinToString(", ") { it.toHexString(Hex.UI16_FORMAT) }
-                )
-            )
-            append(registers.toString())
-            append("\n")
-        }
     }
 }

@@ -9,6 +9,10 @@ import org.akaii.kettles8.emulator.memory.Registers
 import org.akaii.kettles8.ui.Config
 
 class Application(beep: Beep, val config: Config = Config()) {
+    companion object {
+        const val name: String = "kettles8"
+    }
+
     val emulator = Emulator(cpu = Cpu(beep))
         get() = field
 

@@ -1,11 +1,17 @@
 package org.akaii.kettles8
 
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.darkColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.runtime.*
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.*
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.unit.Dp
@@ -16,13 +22,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.akaii.kettles8.beep.DesktopBeep
-import org.akaii.kettles8.ui.ColorSet
+import org.akaii.kettles8.emulator.debug.Debug
+import org.akaii.kettles8.emulator.display.Display.Companion.DISPLAY_HEIGHT_DP
 import org.akaii.kettles8.emulator.input.Keypad
 import org.akaii.kettles8.rom.ROMLoader
 import org.akaii.kettles8.shaders.CRT
 import org.akaii.kettles8.shaders.KettlesShader
-import org.akaii.kettles8.ui.DisplayPanel
-import org.akaii.kettles8.ui.WindowKeypad
+import org.akaii.kettles8.ui.*
 import kotlin.io.path.Path
 
 fun main() = DesktopApp().start()
@@ -33,6 +39,8 @@ class DesktopApp {
     private val logger = KotlinLogging.logger {}
 
     fun start() = application {
+        val focusRequester = remember { FocusRequester() }
+        LaunchedEffect(Unit) { focusRequester.requestFocus() }
         DisposableEffect(Unit) {
             app.start(Application.AppMode.EMULATE)
             onDispose {
@@ -41,12 +49,13 @@ class DesktopApp {
         }
         Window(
             onCloseRequest = ::exitApplication,
-            title = "kettles8",
+            title = Application.name,
             resizable = false,
             state = rememberWindowState(
                 width = Dp.Unspecified,
                 height = Dp.Unspecified
             )
+
         ) {
             MaterialTheme(colors = darkColors()) {
                 MenuBar {
@@ -86,15 +95,30 @@ class DesktopApp {
                             icon = if (selected.value != null) rememberVectorPainter(Icons.Default.Check) else null,
                         )
                     }
+                    Menu("Debug", mnemonic = 'D') {
+                        Item(
+                            text = "CPU",
+                            onClick = {
+                                Debug.flip(app.emulator.cpu)
+                            },
+                            icon = if (Debug.panelVisible.value) rememberVectorPainter(Icons.Default.Check) else null,
+                        )
+                    }
                 }
-                Column(modifier = Modifier.wrapContentSize().onKeyEvent { keyEvent ->
-                    val composeKey = keyEvent.key
-                    when (keyEvent.type) {
-                        KeyEventType.KeyUp -> app.emulator.keypad.onUp(composeKey, app.config.getKeyConfig())
-                        KeyEventType.KeyDown -> app.emulator.keypad.onDown(composeKey, app.config.getKeyConfig())
-                        else -> null
-                    } == true
-                }) {
+                Column(
+                    modifier = Modifier.wrapContentSize().focusRequester(focusRequester).focusable()
+                        .onKeyEvent { keyEvent ->
+                            Debug.step(keyEvent)
+                            when (keyEvent.type) {
+                                KeyEventType.KeyUp -> app.emulator.keypad.onUp(keyEvent.key, app.config.getKeyConfig())
+                                KeyEventType.KeyDown -> app.emulator.keypad.onDown(
+                                    keyEvent.key,
+                                    app.config.getKeyConfig()
+                                )
+
+                                else -> null
+                            } == true
+                        }) {
                     Row(modifier = Modifier.wrapContentSize()) {
                         DisplayPanel(app.emulator.display, app.config)
                         WindowKeypad(
@@ -102,6 +126,14 @@ class DesktopApp {
                             app.emulator.keypad::onDown,
                             app.emulator.keypad::onUp
                         )
+                    }
+                    // Only show DebugPanel when debugCpu is true
+                    if (Debug.panelVisible.value) {
+                        DebugPanel(app.emulator.cpu, app.emulator.keypad) { window.title = it }
+                        window.setSize(window.size.width, window.size.height + DISPLAY_HEIGHT_DP)
+                    } else {
+                        window.setSize(window.size.width, window.size.height - DISPLAY_HEIGHT_DP)
+                        window.title = Application.name
                     }
                 }
             }
@@ -120,6 +152,7 @@ class DesktopApp {
             file?.path?.let {
                 val rom = ROMLoader(Path(it)).load()
                 app.emulator.loadRom(rom)
+                Debug.reset()
             }
         }
     }

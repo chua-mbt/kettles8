@@ -23,7 +23,12 @@ import org.jetbrains.skia.*
 @Composable
 fun DisplayPanel(display: Display, config: Config) {
     Canvas(
-        modifier = Modifier.size((DISPLAY_WIDTH_DP + 20).dp, (DISPLAY_HEIGHT_DP + 20).dp).background(Color.Black),
+        modifier = Modifier
+            .size(
+                (DISPLAY_WIDTH_DP + SHADER_PADDING_DP).dp,
+                (DISPLAY_HEIGHT_DP + SHADER_PADDING_DP).dp
+            )
+            .background(Color.Black),
     ) {
         config.getShader()?.let { withShader(it, display, config) } ?: noShader(display, config)
     }
@@ -33,7 +38,8 @@ fun DrawScope.withShader(shader: KettlesShader, display: Display, config: Config
     val effect = RuntimeEffect.makeForShader(shader.raw)
     val uniforms = shader.uniforms(DISPLAY_WIDTH_DP + SHADER_PADDING_DP, DISPLAY_HEIGHT_DP + SHADER_PADDING_DP)
 
-    val surface = Surface.makeRasterN32Premul(DISPLAY_WIDTH_DP + SHADER_PADDING_DP, DISPLAY_HEIGHT_DP + SHADER_PADDING_DP)
+    val surface =
+        Surface.makeRasterN32Premul(DISPLAY_WIDTH_DP + SHADER_PADDING_DP, DISPLAY_HEIGHT_DP + SHADER_PADDING_DP)
     val canvas = surface.canvas
 
     val colorSet = config.getColorSet()

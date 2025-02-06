@@ -62,21 +62,4 @@ class Registers {
 
     fun toList(): List<UByte> = underlying.toList()
 
-    override fun toString(): String {
-        return buildString {
-            append("\nRegisters\n")
-            append("--------\n")
-
-            for (i in underlying.indices) {
-                val register = Register.fromInt(i)!!
-                val value = underlying[i].toHexString(Hex.UI8_FORMAT)
-
-                // Add space between register and value, and between value and pipe
-                append(String.format("%-2s : %-4s", "$register", value))
-
-                // Add a separator with space after each register
-                if ((i + 1) % 8 == 0) append("\n") else append(" | ")
-            }
-        }
-    }
 }

@@ -51,29 +51,4 @@ class Memory {
     operator fun set(byteAddress: UShort, value: UByte) {
         set(byteAddress.toUInt(), value)
     }
-
-    override fun toString(): String {
-        return buildString {
-            append("\nMemory\n")
-            append("--------\n")
-
-            for (i in underlying.indices) {
-                val value = underlying[i]
-                val hexValue = value.toHexString(Hex.UI8_FORMAT)
-
-                val colorCode = when (i) {
-                    in Address.FONT_BLOCK -> StdoutColors.LIGHT_BLUE
-                    in Address.ROM_BLOCK -> StdoutColors.LIGHT_GREEN
-                    else -> StdoutColors.GRAY
-                }
-
-                append(colorCode)
-                append(hexValue)
-                append(StdoutColors.DEFAULT)
-
-                if ((i + 1) % 32 == 0) append("\n")
-                else append(" ")
-            }
-        }
-    }
 }

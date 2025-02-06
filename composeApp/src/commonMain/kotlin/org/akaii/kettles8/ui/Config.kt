@@ -27,5 +27,4 @@ class Config {
     fun setShader(shader: KettlesShader?) {
         this.shader.value = shader
     }
-
 }

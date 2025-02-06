@@ -1,0 +1,31 @@
+package org.akaii.kettles8.emulator.debug
+
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.type
+import org.akaii.kettles8.emulator.cpu.Cpu
+
+object Debug {
+    val panelVisible: MutableState<Boolean> = mutableStateOf(false)
+    var sampling: (() -> Unit)? = null
+    var maxCycle: Int = Int.MAX_VALUE
+
+    fun flip(cpu: Cpu) {
+        maxCycle = if (panelVisible.value) Int.MAX_VALUE else cpu.cycles
+        panelVisible.value = !panelVisible.value
+    }
+
+    fun step(keyEvent: KeyEvent) {
+        if (keyEvent.type == KeyEventType.KeyUp && keyEvent.key == Key.CtrlLeft && panelVisible.value) {
+            maxCycle++
+        }
+    }
+
+    fun reset() {
+        maxCycle = if (panelVisible.value) 0 else Int.MAX_VALUE
+    }
+}
