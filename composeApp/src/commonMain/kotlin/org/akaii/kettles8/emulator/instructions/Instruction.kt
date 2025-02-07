@@ -474,6 +474,7 @@ class DRW_VX_VY(override val value: UShort) : Instruction(value), VXMask, VYMask
         val startY = cpu.registers[vY]
         val memStart = cpu.indexRegister.toUInt()
         val memEnd = memStart + nC
+        var collision = false
         for (spriteByteAddress in memStart..<memEnd) {
             val offSetY = spriteByteAddress - memStart
             val displayY = screenWrap(startY + offSetY, Display.DISPLAY_HEIGHT)
@@ -483,9 +484,12 @@ class DRW_VX_VY(override val value: UShort) : Instruction(value), VXMask, VYMask
                 val spriteBit = Display.normalize(spriteByte and (0x80u shr offsetX).toUByte())
                 val displayPixel = display[displayX.toUByte(), displayY.toUByte()]
                 display[displayX.toUByte(), displayY.toUByte()] = displayPixel xor spriteBit
-                if (Display.isOn(displayPixel)) cpu.registers[Register.VF] = 1u
+                if (Display.isOn(displayPixel) && spriteBit != 0u.toUByte()) {
+                    collision = true
+                }
             }
         }
+        cpu.registers[Register.VF] = if (collision) 1u else 0u
     }
 
     override fun description(): String =
