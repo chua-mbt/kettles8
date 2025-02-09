@@ -1,12 +1,10 @@
 package org.akaii.kettles8.shaders
 
-import org.akaii.kettles8.emulator.display.Display.Companion.DISPLAY_HEIGHT_DP
-import org.akaii.kettles8.emulator.display.Display.Companion.DISPLAY_WIDTH_DP
 import org.jetbrains.skia.Data
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-object CRT: KettlesShader {
+object CRT: SkslShader {
     override val raw: String
         get() = """
         uniform shader inputImage;

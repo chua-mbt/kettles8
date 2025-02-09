@@ -1,10 +1,13 @@
 package org.akaii.kettles8.shaders
 
-import org.jetbrains.skia.Data
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import org.akaii.kettles8.emulator.display.Display
+import org.akaii.kettles8.ui.Config
 
 interface KettlesShader {
     val raw: String
-    fun uniforms(displayWidth: Int, displayHeight: Int): Data
+
+    fun render(drawScope: DrawScope, display: Display, config: Config)
 
     companion object {
         const val SHADER_PADDING_DP: Int = 20

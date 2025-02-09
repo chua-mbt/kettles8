@@ -5,8 +5,12 @@
         </encoder>
     </appender>
 
-<!--    <root level="debug">-->
-    <root level="off">
+<!--    <root level="DEBUG">-->
+    <root level="OFF">
         <appender-ref ref="STDOUT" />
+    </root>
+
+    <root level="DEBUG">
+        <appender-ref ref="logcat" />
     </root>
 </configuration>

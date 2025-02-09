@@ -31,6 +31,8 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.slf4j.api)
+            implementation(libs.logback.android)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -42,13 +44,13 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.kotlin.logging)
-            implementation(libs.logback.classic)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.vinceglb.filekit.core)
             implementation(libs.vinceglb.filekit.comp)
+            implementation(libs.logback.classic)
         }
         commonTest.dependencies {
             implementation(libs.kotest.runner.junit5)
@@ -70,7 +72,7 @@ android {
     }
     packaging {
         resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/{AL2.0,LGPL2.1,INDEX.LIST}"
         }
     }
     buildTypes {
