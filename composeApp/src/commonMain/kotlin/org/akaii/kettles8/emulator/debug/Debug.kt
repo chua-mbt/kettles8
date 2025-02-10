@@ -19,10 +19,10 @@ object Debug {
         panelVisible.value = !panelVisible.value
     }
 
-    fun step(keyEvent: KeyEvent) {
-        if (keyEvent.type == KeyEventType.KeyUp && keyEvent.key == Key.CtrlLeft && panelVisible.value) {
-            maxCycle++
-        }
+    fun step(keyEvent: KeyEvent): Boolean {
+        val stepInput = keyEvent.type == KeyEventType.KeyUp && keyEvent.key == Key.CtrlLeft && panelVisible.value
+        if (stepInput) { maxCycle++ }
+        return stepInput
     }
 
     fun reset() {

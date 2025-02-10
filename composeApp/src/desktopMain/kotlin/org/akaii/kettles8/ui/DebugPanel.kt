@@ -17,7 +17,6 @@ import org.akaii.kettles8.emulator.format.Hex
 import org.akaii.kettles8.emulator.input.Keypad
 import org.akaii.kettles8.emulator.input.Keypad.Companion.Key
 import org.akaii.kettles8.emulator.memory.Registers.Companion.Register
-import org.akaii.kettles8.shaders.KettlesShader.Companion.SHADER_PADDING_DP
 
 @Composable
 fun DebugPanel(cpu: Cpu, keypad: Keypad, setTitle: (String) -> Unit) {
@@ -27,17 +26,9 @@ fun DebugPanel(cpu: Cpu, keypad: Keypad, setTitle: (String) -> Unit) {
     DisposableEffect(Unit) { onDispose { Debug.sampling = null } }
     samples.value
 
-    setTitle("Cycle: ${cpu.cycles}${cpu.instruction?.let { " | Instruction: ${it.description()}" } ?: "" }")
+    setTitle("Cycle: ${cpu.cycles}${cpu.instruction?.let { " | Instruction: ${it.description()}" } ?: ""}")
 
-    val panelWidth = DISPLAY_WIDTH_DP + SHADER_PADDING_DP + DISPLAY_HEIGHT_DP
-    val panelHeight = DISPLAY_HEIGHT_DP
-
-    Column(
-        modifier = Modifier
-            .size(panelWidth.dp, panelHeight.dp)
-            .padding(8.dp)
-            .fillMaxHeight()
-    ) {
+    Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
         Row(modifier = Modifier.fillMaxSize().weight(1f)) {
             Column(modifier = Modifier.weight(2f).padding(end = 8.dp).fillMaxHeight()) {
                 Section("Registers") {
@@ -77,7 +68,11 @@ fun DebugPanel(cpu: Cpu, keypad: Keypad, setTitle: (String) -> Unit) {
 
             Column(modifier = Modifier.weight(2f).fillMaxHeight()) {
                 Section("Stack") {
-                    GridDisplay(cpu.stack.reversed().mapIndexed { i, v -> "S${cpu.stack.lastIndex - i}" to v.toHexString(Hex.UI8_FORMAT) }, columns = 4)
+                    GridDisplay(
+                        cpu.stack.reversed()
+                            .mapIndexed { i, v -> "S${cpu.stack.lastIndex - i}" to v.toHexString(Hex.UI8_FORMAT) },
+                        columns = 4
+                    )
                 }
             }
         }
@@ -113,7 +108,12 @@ fun GridDisplay(pairs: List<Pair<String, String>>, columns: Int, fontSize: TextU
                             .weight(1f)
                             .fillMaxHeight()
                     ) {
-                        Text(label, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, fontSize = fontSize)
+                        Text(
+                            label,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = fontSize
+                        )
                         Text(value, fontFamily = FontFamily.Monospace, fontSize = fontSize)
                     }
                 }

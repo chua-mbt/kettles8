@@ -11,5 +11,6 @@ interface KettlesShader {
 
     companion object {
         const val SHADER_PADDING_DP: Int = 20
+        const val SHADER_PADDING: Int = 2
     }
 }

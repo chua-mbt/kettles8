@@ -1,5 +1,6 @@
 package org.akaii.kettles8
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
@@ -12,9 +13,10 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.*
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.key.*
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.vinceglb.filekit.core.*
@@ -23,7 +25,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.akaii.kettles8.beep.DesktopBeep
 import org.akaii.kettles8.emulator.debug.Debug
-import org.akaii.kettles8.emulator.display.Display.Companion.DISPLAY_HEIGHT_DP
 import org.akaii.kettles8.emulator.input.Keypad
 import org.akaii.kettles8.rom.ROMLoader
 import org.akaii.kettles8.shaders.CRT
@@ -38,9 +39,10 @@ class DesktopApp {
     private val app = Application(beep = DesktopBeep())
     private val logger = KotlinLogging.logger {}
 
+    private val WINDOW_WIDTH = 960
+    private val WINDOW_HEIGHT = 380
+
     fun start() = application {
-        val focusRequester = remember { FocusRequester() }
-        LaunchedEffect(Unit) { focusRequester.requestFocus() }
         DisposableEffect(Unit) {
             app.start(Application.AppMode.EMULATE)
             onDispose {
@@ -50,12 +52,8 @@ class DesktopApp {
         Window(
             onCloseRequest = ::exitApplication,
             title = Application.name,
-            resizable = false,
-            state = rememberWindowState(
-                width = Dp.Unspecified,
-                height = Dp.Unspecified
-            )
-
+            resizable = true,
+            state = rememberWindowState(width = WINDOW_WIDTH.dp, height = WINDOW_HEIGHT.dp)
         ) {
             MaterialTheme(colors = darkColors()) {
                 MenuBar {
@@ -105,10 +103,14 @@ class DesktopApp {
                         )
                     }
                 }
-                Column(
-                    modifier = Modifier.wrapContentSize().focusRequester(focusRequester).focusable()
+
+                val focusRequester = remember { FocusRequester() }
+                BoxWithConstraints(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .focusRequester(focusRequester)
+                        .focusable()
                         .onKeyEvent { keyEvent ->
-                            Debug.step(keyEvent)
                             when (keyEvent.type) {
                                 KeyEventType.KeyUp -> app.emulator.keypad.onUp(keyEvent.key, app.config.getKeyConfig())
                                 KeyEventType.KeyDown -> app.emulator.keypad.onDown(
@@ -119,21 +121,37 @@ class DesktopApp {
                                 else -> null
                             } == true
                         }) {
-                    Row(modifier = Modifier.wrapContentSize()) {
-                        DisplayPanel(app.emulator.display, app.config)
-                        WindowKeypad(
-                            app.config,
-                            app.emulator.keypad::onDown,
-                            app.emulator.keypad::onUp
-                        )
+
+                    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+                    val displayWidth = maxWidth * 2 / 3
+                    val keypadWidth = maxWidth / 3
+
+                    Row(Modifier.fillMaxSize()) {
+                        Box(Modifier.width(displayWidth).fillMaxHeight().background(Color.Black)) {
+                            DisplayPanel(app.emulator.display, app.config)
+                        }
+                        Box(Modifier.width(keypadWidth).fillMaxHeight()) {
+                            WindowKeypad(
+                                app.config,
+                                app.emulator.keypad::onDown,
+                                app.emulator.keypad::onUp
+                            )
+                        }
                     }
-                    // Only show DebugPanel when debugCpu is true
+
                     if (Debug.panelVisible.value) {
-                        DebugPanel(app.emulator.cpu, app.emulator.keypad) { window.title = it }
-                        window.setSize(window.size.width, window.size.height + DISPLAY_HEIGHT_DP)
-                    } else {
-                        window.setSize(window.size.width, window.size.height - DISPLAY_HEIGHT_DP)
-                        window.title = Application.name
+                        val debugFocusRequester = remember { FocusRequester() }
+
+                        Window(onCloseRequest = { Debug.flip(app.emulator.cpu) }) {
+                            Box(
+                                Modifier.fillMaxSize()
+                                    .focusRequester(debugFocusRequester)
+                                    .focusable()
+                                    .onKeyEvent { keyEvent -> Debug.step(keyEvent) }) {
+                                LaunchedEffect(Unit) { debugFocusRequester.requestFocus() }
+                                DebugPanel(app.emulator.cpu, app.emulator.keypad) { window.title = it }
+                            }
+                        }
                     }
                 }
             }

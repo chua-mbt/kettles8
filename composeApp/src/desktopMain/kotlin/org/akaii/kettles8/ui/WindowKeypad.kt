@@ -3,7 +3,6 @@ package org.akaii.kettles8.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import org.akaii.kettles8.emulator.input.Keypad.Companion.Key
@@ -18,18 +17,17 @@ object WindowKeypad {
 
     @Composable
     operator fun invoke(config: Config, onDown: (Key) -> Unit, onUp: (Key) -> Unit) {
-        Column(
-            modifier = Modifier.wrapContentSize().background(Color(config.getColorSet().pixel)),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceEvenly
-        ) {
-            for (row in KEYS) {
-                Row(
-                    modifier = Modifier.wrapContentSize(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    for (key in row) {
-                        KeyButton(config, key, onDown, onUp)
+        BoxWithConstraints(Modifier.fillMaxSize()) {
+            val boxSize = (maxWidth / KEYS.size).coerceAtMost(maxHeight / KEYS.size)
+
+            Column(Modifier.fillMaxSize().background(Color(config.getColorSet().pixel))) {
+                for (row in KEYS) {
+                    Row {
+                        for (key in row) {
+                            Box(Modifier.size(boxSize)) {
+                                KeyButton(config, key, onDown, onUp)
+                            }
+                        }
                     }
                 }
             }
