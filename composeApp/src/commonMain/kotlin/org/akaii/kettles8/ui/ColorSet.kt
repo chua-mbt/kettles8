@@ -10,6 +10,16 @@ data class ColorSet(val name: String, val background: Int, val pixel: Int) {
         val Purples = ColorSet("Purples", 0xFFE5CCFF.toInt(), 0xFF2D004D.toInt())
         val Oranges = ColorSet("Oranges", 0xFFFFE5CC.toInt(), 0xFF4D2600.toInt())
 
-        val values = listOf(Grays, Reds, Blues, Greens, Yellows, Purples, Oranges)
+        val OrangeDarkRed = ColorSet("Orange & Red", 0xFF8B0000.toInt(), 0xFFFFA500.toInt())
+        val WhiteTerm = ColorSet("White Term", 0xFF000000.toInt(), 0xFFFFFFFF.toInt())
+        val GreenTerm = ColorSet("Green Term", 0xFF000000.toInt(), 0xFF00FF00.toInt())
+        val AmberTerm = ColorSet("Amber Term", 0xFF000000.toInt(), 0xFFFFBF00.toInt())
+        val CyanTerm = ColorSet("Cyan Term", 0xFF000000.toInt(), 0xFF00FFFF.toInt())
+        val WinTerm = ColorSet("Windows Term", 0xFF00008B.toInt(), 0xFFADD8E6.toInt())
+
+        val values = listOf(
+            Grays, Reds, Blues, Greens, Yellows, Purples, Oranges,
+            OrangeDarkRed, WhiteTerm, GreenTerm, AmberTerm, CyanTerm, WinTerm
+        )
     }
 }
