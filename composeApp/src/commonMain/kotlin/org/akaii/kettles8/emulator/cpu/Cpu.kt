@@ -31,7 +31,7 @@ class Cpu(private val beep: Beep = NoBeep()) {
     var instruction: Instruction? = null
 
     fun advanceProgram() {
-        programCounter = (programCounter + Instruction.Companion.INSTRUCTION_SIZE).toUShort()
+        programCounter = (programCounter + Instruction.INSTRUCTION_SIZE).toUShort()
     }
 
     fun updateTimers() {

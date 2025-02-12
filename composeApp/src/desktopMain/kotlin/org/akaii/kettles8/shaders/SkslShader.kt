@@ -11,25 +11,25 @@ interface SkslShader : KettlesShader {
     fun uniforms(displayWidth: Int, displayHeight: Int): Data
 
     override fun render(drawScope: DrawScope, display: Display, config: Config) {
-        val effect = RuntimeEffect.Companion.makeForShader(raw)
+        val effect = RuntimeEffect.makeForShader(raw)
 
-        val unitWidth = (drawScope.size.width / (Display.Companion.DISPLAY_WIDTH + SHADER_PADDING)).toFloat()
-        val unitHeight = (drawScope.size.height / (Display.Companion.DISPLAY_HEIGHT + SHADER_PADDING)).toFloat()
-        val adaptedWidth = (Display.Companion.DISPLAY_WIDTH + SHADER_PADDING) * unitWidth
-        val adaptedHeight = (Display.Companion.DISPLAY_HEIGHT + SHADER_PADDING) * unitHeight
+        val unitWidth = (drawScope.size.width / (Display.DISPLAY_WIDTH + SHADER_PADDING)).toFloat()
+        val unitHeight = (drawScope.size.height / (Display.DISPLAY_HEIGHT + SHADER_PADDING)).toFloat()
+        val adaptedWidth = (Display.DISPLAY_WIDTH + SHADER_PADDING) * unitWidth
+        val adaptedHeight = (Display.DISPLAY_HEIGHT + SHADER_PADDING) * unitHeight
 
         val uniforms = uniforms(adaptedWidth.toInt(), adaptedHeight.toInt())
 
-        val surface = Surface.Companion.makeRasterN32Premul(adaptedWidth.toInt(), adaptedHeight.toInt())
+        val surface = Surface.makeRasterN32Premul(adaptedWidth.toInt(), adaptedHeight.toInt())
         val canvas = surface.canvas
 
         val colorSet = config.getColorSet()
 
         display.renderState().forEachIndexed { column, columns ->
             columns.forEachIndexed { row, cell ->
-                val col = if (Display.Companion.isOn(cell.value)) colorSet.pixel else colorSet.background
+                val col = if (Display.isOn(cell.value)) colorSet.pixel else colorSet.background
                 canvas.drawRect(
-                    Rect.Companion.makeXYWH(
+                    Rect.makeXYWH(
                         (column + SHADER_PADDING / 2) * unitWidth,
                         (row + SHADER_PADDING / 2) * unitHeight,
                         unitWidth + 1,
@@ -45,7 +45,7 @@ interface SkslShader : KettlesShader {
         val skPaint = Paint().apply { this.shader = shader }
 
         drawScope.drawContext.canvas.nativeCanvas.drawRect(
-            Rect.Companion.makeXYWH(0f, 0f, adaptedWidth, adaptedHeight), skPaint
+            Rect.makeXYWH(0f, 0f, adaptedWidth, adaptedHeight), skPaint
         )
     }
 }

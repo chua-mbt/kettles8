@@ -67,5 +67,5 @@ class Chip8RunLoop : Interpreter {
     }
 
     fun fetchInstruction(cpu: Cpu, memory: Memory): Instruction =
-        Instruction.Companion.decode(memory.getInstruction(cpu.programCounter))
+        Instruction.decode(memory.getInstruction(cpu.programCounter))
 }

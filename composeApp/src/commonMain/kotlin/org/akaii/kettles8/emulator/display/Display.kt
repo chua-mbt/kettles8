@@ -6,9 +6,7 @@ class Display {
     companion object {
         const val DISPLAY_WIDTH = 64
         const val DISPLAY_HEIGHT = 32
-
-        const val DISPLAY_WIDTH_DP = DISPLAY_WIDTH * 10
-        const val DISPLAY_HEIGHT_DP = DISPLAY_HEIGHT * 10
+        const val ASPECT_RATIO: Float = (DISPLAY_WIDTH / DISPLAY_HEIGHT).toFloat()
 
         fun normalize(pixel: UByte): UByte =
             if (pixel == UByte.MIN_VALUE) 0u else UByte.MAX_VALUE

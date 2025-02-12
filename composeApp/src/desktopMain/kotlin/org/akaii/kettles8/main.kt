@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 import org.akaii.kettles8.beep.DesktopBeep
 import org.akaii.kettles8.emulator.debug.Debug
 import org.akaii.kettles8.emulator.input.Keypad
-import org.akaii.kettles8.rom.ROMLoader
+import org.akaii.kettles8.rom.DesktopROM
 import org.akaii.kettles8.shaders.CRT
 import org.akaii.kettles8.shaders.KettlesShader
 import org.akaii.kettles8.ui.*
@@ -161,14 +161,14 @@ class DesktopApp {
     fun pickRom() {
         CoroutineScope(Dispatchers.Default).launch {
             val file = FileKit.pickFile(
-                type = PickerType.File(listOf(ROMLoader.ROM_EXTENSION)),
+                type = PickerType.File(listOf("ch8")),
                 mode = PickerMode.Single
             )
 
             logger.debug { "Picked file: $file" }
 
             file?.path?.let {
-                val rom = ROMLoader(Path(it)).load()
+                val rom = DesktopROM(Path(it)).load()
                 app.emulator.loadRom(rom)
                 Debug.reset()
             }

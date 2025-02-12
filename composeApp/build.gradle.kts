@@ -48,9 +48,9 @@ kotlin {
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
+            implementation(libs.logback.classic)
             implementation(libs.vinceglb.filekit.core)
             implementation(libs.vinceglb.filekit.comp)
-            implementation(libs.logback.classic)
         }
         commonTest.dependencies {
             implementation(libs.kotest.runner.junit5)

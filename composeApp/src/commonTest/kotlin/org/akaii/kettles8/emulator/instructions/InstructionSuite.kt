@@ -34,7 +34,7 @@ class InstructionSuite : FunSpec({
     }
 
     test("VYMask") {
-        for (register in Registers.Companion.Register.entries) {
+        for (register in Register.entries) {
             val withVYMask = object : VYMask {
                 override val value: UShort
                     get() = (0xF203u or (register.value.toUInt() shl 4)).toUShort()

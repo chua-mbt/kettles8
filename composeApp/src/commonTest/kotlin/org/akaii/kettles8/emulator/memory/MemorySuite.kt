@@ -4,14 +4,14 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.*
 import io.kotest.matchers.collections.*
 import org.akaii.kettles8.emulator.display.DefaultFont
-import org.akaii.kettles8.rom.ROMLoader
+import org.akaii.kettles8.rom.DesktopROM
 import kotlin.io.path.toPath
 
 class MemorySuite : FunSpec({
 
     suspend fun loadResourceROM(romName: String): UByteArray {
         val path = javaClass.classLoader.getResource("kettles8/rom/$romName")!!.toURI().toPath()
-        return ROMLoader(path).load()
+        return DesktopROM(path).load()
     }
 
     test("Initialization") {

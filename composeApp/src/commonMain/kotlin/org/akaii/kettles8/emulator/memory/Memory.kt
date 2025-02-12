@@ -1,8 +1,6 @@
 package org.akaii.kettles8.emulator.memory
 
 import org.akaii.kettles8.emulator.display.DefaultFont
-import org.akaii.kettles8.emulator.format.Hex
-import org.akaii.kettles8.emulator.format.StdoutColors
 
 class Memory {
 

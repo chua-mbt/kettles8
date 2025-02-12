@@ -1,7 +1,6 @@
 package org.akaii.kettles8.ui
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -11,8 +10,6 @@ import androidx.compose.ui.text.font.*
 import androidx.compose.ui.unit.*
 import org.akaii.kettles8.emulator.cpu.Cpu
 import org.akaii.kettles8.emulator.debug.Debug
-import org.akaii.kettles8.emulator.display.Display.Companion.DISPLAY_HEIGHT_DP
-import org.akaii.kettles8.emulator.display.Display.Companion.DISPLAY_WIDTH_DP
 import org.akaii.kettles8.emulator.format.Hex
 import org.akaii.kettles8.emulator.input.Keypad
 import org.akaii.kettles8.emulator.input.Keypad.Companion.Key
