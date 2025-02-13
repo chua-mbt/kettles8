@@ -5,8 +5,11 @@ import io.kotest.matchers.*
 import io.kotest.matchers.collections.*
 import io.kotest.matchers.nulls.shouldBeNull
 import org.akaii.kettles8.emulator.Emulator
+import org.akaii.kettles8.emulator.beep.Beep
+import org.akaii.kettles8.emulator.cpu.Cpu
 import org.akaii.kettles8.emulator.input.Keypad
 import org.akaii.kettles8.emulator.memory.Address
+import org.akaii.kettles8.emulator.memory.Registers.Companion.Register
 
 class Chip8RunLoopSuite : FunSpec({
     test("Cycle when running") {
@@ -67,5 +70,46 @@ class Chip8RunLoopSuite : FunSpec({
         emulator.cpu.cycles shouldBe(0)
         emulator.cpu.programCounter shouldBe(Address.ROM_START)
         emulator.display.flattened().shouldContainOnly(UByte.MAX_VALUE)
+    }
+
+    test("Beep runs until sound timer expires") {
+        var beeping = false
+        val beepTestCpu = Cpu(object : Beep {
+            override fun start() {
+                beeping = true
+            }
+
+            override fun stop() {
+                beeping  = false
+            }
+
+            override fun cleanup() {}
+        })
+        val emulator = Emulator(cpu = beepTestCpu)
+        emulator.memory[Address.ROM_START.toUInt()] = 0x6Au
+        emulator.memory[Address.ROM_START+1u] = 0x0Au
+        emulator.memory[Address.ROM_START+2u] = 0xFAu
+        emulator.memory[Address.ROM_START+3u] = 0x18u
+
+        beeping shouldBe false
+        emulator.cpu.cycles shouldBe(0)
+
+        val runLoop = emulator.interpreter as Chip8RunLoop
+        emulator.cpu.running = true
+        runLoop.cpuTick(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
+        emulator.cpu.registers[Register.VA] shouldBe 10u
+
+        emulator.cpu.soundTimer shouldBe 0u
+        runLoop.cpuTick(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
+        emulator.cpu.soundTimer shouldBe 10u
+
+        (0..<10).forEach {
+            emulator.cpu.updateTimers()
+            emulator.cpu.soundTimer shouldBe (10u - it.toUInt() - 1u).toUByte()
+            beeping shouldBe true
+        }
+
+        emulator.cpu.updateTimers()
+        beeping shouldBe false
     }
 })

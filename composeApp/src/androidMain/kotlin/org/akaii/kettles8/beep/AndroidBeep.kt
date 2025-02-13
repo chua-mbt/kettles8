@@ -1,13 +1,13 @@
 package org.akaii.kettles8.beep
 
+import android.media.AudioFormat
+import android.media.AudioManager
+import android.media.AudioTrack
 import org.akaii.kettles8.emulator.beep.Beep
-import javax.sound.sampled.AudioFormat
-import javax.sound.sampled.AudioSystem
-import javax.sound.sampled.SourceDataLine
 import kotlin.concurrent.thread
 
-class DesktopBeep : Beep {
-    private var line: SourceDataLine? = null
+class AndroidBeep : Beep {
+    private var audioTrack: AudioTrack? = null
     private var playing = false
     private val beepData: ByteArray
 
@@ -19,37 +19,45 @@ class DesktopBeep : Beep {
         val samples = (sampleRate * lengthS).toInt()
         beepData = ByteArray(samples) { i ->
             val amplitude = 4
-            //val fullPeriod = 2.0 * Math.PI
-            //(amplitude * sin(fullPeriod * frequency * i / sampleRate)).toInt().toByte()
             val halfPeriod = (sampleRate / frequency).toInt()
             val value = if (i % halfPeriod < halfPeriod / 2) amplitude else -amplitude
             value.toByte()
         }
 
-        val format = AudioFormat(sampleRate, 8, 1, true, false)
-        line =
-            AudioSystem.getLine(javax.sound.sampled.DataLine.Info(SourceDataLine::class.java, format)) as SourceDataLine
-        line?.open(format, samples)
+        val minBufferSize = AudioTrack.getMinBufferSize(
+            sampleRate.toInt(),
+            AudioFormat.CHANNEL_OUT_MONO,
+            AudioFormat.ENCODING_PCM_8BIT
+        )
+
+        audioTrack = AudioTrack(
+            AudioManager.STREAM_MUSIC,
+            sampleRate.toInt(),
+            AudioFormat.CHANNEL_OUT_MONO,
+            AudioFormat.ENCODING_PCM_8BIT,
+            minBufferSize,
+            AudioTrack.MODE_STREAM
+        )
     }
 
     override fun start() {
         if (playing) return
-        line?.start()
+        audioTrack?.play()
         playing = true
         thread {
             while (playing) {
-                line?.write(beepData, 0, beepData.size)
+                audioTrack?.write(beepData, 0, beepData.size)
             }
         }
     }
 
     override fun stop() {
         playing = false
-        line?.stop()
+        audioTrack?.stop()
     }
 
     override fun cleanup() {
         stop()
-        line?.close()
+        audioTrack?.release()
     }
 }

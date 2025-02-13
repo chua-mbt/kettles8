@@ -10,6 +10,7 @@ import io.kotest.property.checkAll
 import org.akaii.kettles8.emulator.Emulator
 import org.akaii.kettles8.emulator.input.Keypad.Companion.Key
 import org.akaii.kettles8.emulator.memory.*
+import org.akaii.kettles8.emulator.memory.Registers.Companion.Register
 import org.akaii.kettles8.emulator.memory.Registers.Companion.Register.*
 import kotlin.math.ln
 
@@ -24,7 +25,7 @@ class InstructionSuite : FunSpec({
     }
 
     test("VXMask") {
-        for (register in Registers.Companion.Register.entries) {
+        for (register in Register.entries) {
             val withVXMask = object : VXMask {
                 override val value: UShort
                     get() = (0xF023u or (register.value.toUInt() shl 8)).toUShort()

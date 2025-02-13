@@ -10,12 +10,12 @@ import androidx.compose.material.*
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import org.akaii.kettles8.emulator.beep.NoBeep
+import org.akaii.kettles8.beep.AndroidBeep
 import org.akaii.kettles8.rom.AndroidROM
 import org.akaii.kettles8.ui.*
 
 class MainActivity : ComponentActivity() {
-    private val app = Application(beep = NoBeep())
+    private val app = Application(beep = AndroidBeep())
 
     private lateinit var pickROM: ActivityResultLauncher<Array<String>>
 
