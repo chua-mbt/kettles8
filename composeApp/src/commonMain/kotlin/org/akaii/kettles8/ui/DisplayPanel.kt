@@ -14,11 +14,14 @@ import org.akaii.kettles8.emulator.display.Display.Companion.DISPLAY_HEIGHT
 import org.akaii.kettles8.emulator.display.Display.Companion.DISPLAY_WIDTH
 
 @Composable
-fun DisplayPanel(display: Display, config: Config) {
+fun DisplayPanel(display: Display, config: Config, extraShaderCondition: Boolean = true) {
     Canvas(
         modifier = Modifier.fillMaxSize().background(Color.Black),
     ) {
-        config.getShader()?.render(this, display, config) ?: noShader(display, config)
+        config.getShader()
+            ?.takeIf { extraShaderCondition }
+            ?.render(this, display, config)
+            ?: noShader(display, config)
     }
 }
 

@@ -4,7 +4,7 @@ import org.jetbrains.skia.Data
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-object CRT : SkslShader {
+object CrtSksl : SkslShader {
     override val raw: String
         get() = """
             uniform shader inputImage;

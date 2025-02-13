@@ -27,7 +27,7 @@ import org.akaii.kettles8.beep.DesktopBeep
 import org.akaii.kettles8.emulator.debug.Debug
 import org.akaii.kettles8.emulator.input.Keypad
 import org.akaii.kettles8.rom.DesktopROM
-import org.akaii.kettles8.shaders.CRT
+import org.akaii.kettles8.shaders.CrtSksl
 import org.akaii.kettles8.shaders.KettlesShader
 import org.akaii.kettles8.ui.*
 import kotlin.io.path.Path
@@ -87,7 +87,7 @@ class DesktopApp {
                         Item(
                             text = "CRT",
                             onClick = {
-                                val newValue = if (selected.value == null) CRT else null
+                                val newValue = if (selected.value == null) CrtSksl else null
                                 app.config.setShader(newValue)
                             },
                             icon = if (selected.value != null) rememberVectorPainter(Icons.Default.Check) else null,

@@ -1,6 +1,7 @@
 package org.akaii.kettles8
 
 import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import org.akaii.kettles8.beep.AndroidBeep
 import org.akaii.kettles8.emulator.display.Display
 import org.akaii.kettles8.rom.AndroidROM
+import org.akaii.kettles8.shaders.CrtAgsl
 import org.akaii.kettles8.ui.*
 
 class MainActivity : ComponentActivity() {
@@ -27,9 +29,12 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var pickROM: ActivityResultLauncher<Array<String>>
 
+    private val useShader = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         app.start(Application.AppMode.EMULATE)
+        if(useShader) { app.config.setShader(CrtAgsl) }
 
         pickROM = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             uri?.let {
@@ -69,7 +74,7 @@ class MainActivity : ComponentActivity() {
                                             .align(Alignment.CenterVertically)
                                             .border(1.dp, Color(app.config.colorState.value.background))
                                     ) {
-                                        DisplayPanel(app.emulator.display, app.config)
+                                        DisplayPanel(app.emulator.display, app.config, useShader)
                                     }
                                     Box(
                                         modifier = Modifier
@@ -94,7 +99,7 @@ class MainActivity : ComponentActivity() {
                                             .align(Alignment.CenterHorizontally)
                                             .border(1.dp, Color(app.config.colorState.value.background))
                                     ) {
-                                        DisplayPanel(app.emulator.display, app.config)
+                                        DisplayPanel(app.emulator.display, app.config, useShader)
                                     }
                                     Box(
                                         modifier = Modifier
