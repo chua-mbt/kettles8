@@ -131,7 +131,7 @@ class DesktopApp {
                             DisplayPanel(app.emulator.display, app.config)
                         }
                         Box(Modifier.width(keypadWidth).fillMaxHeight()) {
-                            WindowKeypad(
+                            KeyPanel(
                                 app.config,
                                 app.emulator.keypad::onDown,
                                 app.emulator.keypad::onUp

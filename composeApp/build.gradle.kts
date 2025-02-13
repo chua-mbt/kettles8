@@ -12,7 +12,11 @@ plugins {
 kotlin {
     compilerOptions {
         freeCompilerArgs.addAll(
-            listOf("-opt-in=kotlin.ExperimentalUnsignedTypes", "-opt-in=kotlin.ExperimentalStdlibApi")
+            listOf(
+                "-opt-in=kotlin.ExperimentalUnsignedTypes",
+                "-opt-in=kotlin.ExperimentalStdlibApi",
+                "-opt-in=androidx.compose.material.ExperimentalMaterialApi"
+            )
         )
     }
 
