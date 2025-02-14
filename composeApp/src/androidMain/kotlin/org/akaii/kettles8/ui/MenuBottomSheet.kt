@@ -1,5 +1,6 @@
 package org.akaii.kettles8.ui
 
+import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -53,6 +54,9 @@ fun MenuBottomSheet(
                 MenuItem("ROM", config, pickROM, closeMenu)
                 MenuItem("Reset", config, reset, closeMenu)
                 MenuItem("Theme", config, pickColor, closeMenu)
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    ShaderMenuItem(config, closeMenu)
+                }
             }
         },
         sheetPeekHeight = peekHeight,
@@ -61,7 +65,7 @@ fun MenuBottomSheet(
 }
 
 @Composable
-fun MenuItem(label: String, config: Config,onClick: () -> Unit, closeMenu: () -> Unit) {
+fun MenuItem(label: String, config: Config, onClick: () -> Unit, closeMenu: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
