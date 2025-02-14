@@ -53,6 +53,7 @@ class MainActivity : ComponentActivity() {
                     MenuBottomSheet(
                         config = app.config,
                         pickROM = { pickROM.launch(arrayOf("*/*")) },
+                        reset = { app.emulator.reset() },
                         pickColor = { showThemePicker.value = true }
                     ) { padding ->
                         Box(

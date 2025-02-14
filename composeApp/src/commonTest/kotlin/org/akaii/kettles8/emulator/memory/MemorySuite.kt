@@ -4,15 +4,11 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.*
 import io.kotest.matchers.collections.*
 import org.akaii.kettles8.emulator.display.DefaultFont
-import org.akaii.kettles8.rom.DesktopROM
-import kotlin.io.path.toPath
+import kotlin.random.Random
 
 class MemorySuite : FunSpec({
 
-    suspend fun loadResourceROM(romName: String): UByteArray {
-        val path = javaClass.classLoader.getResource("kettles8/rom/$romName")!!.toURI().toPath()
-        return DesktopROM(path).load()
-    }
+    val fakeROM: UByteArray = (0..<Address.ROM_BLOCK_SIZE).map { (it % 255).toUByte() }.toUByteArray()
 
     test("Initialization") {
         val initialized = Memory()
@@ -25,15 +21,43 @@ class MemorySuite : FunSpec({
 
     test("Setting ROM into Memory") {
         val memory = Memory()
-        val loadedRom = loadResourceROM("1-chip8-logo.ch8")
-        memory.setFromROM(loadedRom)
+        val loadedROM = fakeROM.take(1000).toUByteArray()
+        memory.setFromROM(loadedROM)
         val fontBlock = memory.slice(Address.FONT_BLOCK)
         val romBlock = memory.slice(Address.ROM_BLOCK)
 
         fontBlock shouldBe DefaultFont.representation
-        romBlock.take(loadedRom.size) shouldBe loadedRom
-        romBlock.drop(loadedRom.size) shouldContainOnly listOf(0u)
+        romBlock.take(loadedROM.size) shouldBe loadedROM
+        romBlock.drop(loadedROM.size) shouldContainOnly listOf(0u)
 
-        memory.getInstruction(Address.ROM_START) shouldBe 0x00E0u
+        memory.getInstruction(Address.ROM_START) shouldBe 1u
+    }
+
+    test("Setting Max-Sized ROM into Memory") {
+        val memory = Memory()
+        memory.setFromROM(fakeROM)
+        val fontBlock = memory.slice(Address.FONT_BLOCK)
+        val romBlock = memory.slice(Address.ROM_BLOCK)
+
+        fontBlock shouldBe DefaultFont.representation
+        romBlock shouldBe fakeROM
+
+        memory[Address.ROM_END.toUInt()] shouldBe fakeROM.last()
+    }
+
+    test("Reset") {
+        val memory = Memory()
+        memory.setFromROM(fakeROM)
+
+        (0..<Address.ROM_BLOCK_SIZE).forEach { index ->
+            memory[index.toUInt()] = (Random(0).nextInt() % 255).toUByte()
+        }
+
+        val afterChanges = memory.slice(Address.ROM_BLOCK)
+        afterChanges shouldNotBe fakeROM
+
+        memory.reset()
+        val afterReset = memory.slice(Address.ROM_BLOCK)
+        afterReset shouldBe fakeROM
     }
 })

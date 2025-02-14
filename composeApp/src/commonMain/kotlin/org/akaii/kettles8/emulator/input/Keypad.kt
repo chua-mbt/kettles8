@@ -112,7 +112,7 @@ class Keypad {
         return justReleased?.let { Key.ofValue(it.toUByte()) }
     }
 
-    fun reset() {
+    fun clear() {
         underlying.fill(false)
         previous.fill(false)
     }

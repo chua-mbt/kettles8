@@ -15,17 +15,25 @@ class Emulator(
     val interpreter: Interpreter = Chip8RunLoop()
 ) : Interpreter by interpreter {
 
-    fun reset() {
-        cpu.reset()
-        memory.reset()
+    private fun clear() {
+        cpu.clear()
+        memory.clear()
         display.clear()
-        keypad.reset()
+        keypad.clear()
     }
 
     fun loadRom(rom: UByteArray) {
-        reset()
+        clear()
         memory.setFromROM(rom)
         cpu.running = true
+    }
+
+    fun reset() {
+        cpu.clear()
+        memory.reset()
+        display.clear()
+        keypad.clear()
+        if(memory.isInitialized()) cpu.running = true
     }
 
     override fun cleanup() {

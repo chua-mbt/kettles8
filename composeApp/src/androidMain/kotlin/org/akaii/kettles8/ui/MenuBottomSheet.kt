@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 fun MenuBottomSheet(
     config: Config,
     pickROM: () -> Unit,
+    reset: () -> Unit,
     pickColor: () -> Unit,
     content: @Composable (PaddingValues) -> Unit
 ) {
@@ -43,6 +44,7 @@ fun MenuBottomSheet(
                     contentDescription = "Expand"
                 )
                 MenuItem("ROM", config, pickROM)
+                MenuItem("Reset", config, reset)
                 MenuItem("Theme", config, pickColor)
             }
         },

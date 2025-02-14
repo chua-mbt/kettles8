@@ -5,12 +5,13 @@ import org.akaii.kettles8.emulator.display.DefaultFont
 class Memory {
 
     private val underlying: UByteArray = UByteArray(Address.TOTAL_SIZE)
+    private val romCopy: UByteArray = UByteArray(Address.ROM_BLOCK_SIZE)
 
     init {
-        reset()
+        clear()
     }
 
-    fun reset() {
+    fun clear() {
         underlying.fill(0u)
         DefaultFont.representation.copyInto(
             underlying,
@@ -20,13 +21,31 @@ class Memory {
         )
     }
 
-    fun setFromROM(loadedROM: UByteArray) {
-        loadedROM.copyInto(
+    fun isInitialized(): Boolean =
+        romCopy.any { it != 0.toUByte() }
+
+    fun reset() {
+        clear()
+        startROM()
+    }
+
+    private fun startROM() {
+        romCopy.copyInto(
             underlying,
             destinationOffset = Address.ROM_START.toInt(),
             startIndex = 0,
+            endIndex = Address.ROM_BLOCK_SIZE
+        )
+    }
+
+    fun setFromROM(loadedROM: UByteArray) {
+        loadedROM.copyInto(
+            romCopy,
+            destinationOffset = 0,
+            startIndex = 0,
             endIndex = minOf(Address.ROM_BLOCK_SIZE, loadedROM.size)
         )
+        startROM()
     }
 
     fun slice(addressRange: IntRange): UByteArray =

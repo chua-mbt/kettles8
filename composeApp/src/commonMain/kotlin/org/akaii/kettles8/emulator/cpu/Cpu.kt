@@ -44,7 +44,7 @@ class Cpu(private val beep: Beep = NoBeep()) {
         }
     }
 
-    fun reset() {
+    fun clear() {
         stack.clear()
         registers.reset()
         programCounter = Address.ROM_START

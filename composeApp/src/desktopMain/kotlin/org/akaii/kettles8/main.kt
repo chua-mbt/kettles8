@@ -61,6 +61,9 @@ class DesktopApp {
                         Item("ROM") {
                             pickRom()
                         }
+                        Item("Reset") {
+                            app.emulator.reset()
+                        }
                     }
                     Menu("Keypad", mnemonic = 'K') {
                         val selected: State<Keypad.Companion.KeyConfig> = remember { app.config.keyConfigState }
