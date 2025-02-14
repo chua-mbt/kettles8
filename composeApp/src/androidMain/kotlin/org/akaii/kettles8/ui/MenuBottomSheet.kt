@@ -12,10 +12,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 
 @Composable
 fun MenuBottomSheet(
@@ -26,7 +28,12 @@ fun MenuBottomSheet(
     content: @Composable (PaddingValues) -> Unit
 ) {
     val sheetScaffoldState = rememberBottomSheetScaffoldState()
+    val coroutineScope = rememberCoroutineScope()
     val peekHeight = 20.dp
+
+    val closeMenu: () -> Unit = {
+        coroutineScope.launch { sheetScaffoldState.bottomSheetState.collapse() }
+    }
 
     BottomSheetScaffold(
         scaffoldState = sheetScaffoldState,
@@ -43,9 +50,9 @@ fun MenuBottomSheet(
                     tint = Color(config.colorState.value.pixel),
                     contentDescription = "Expand"
                 )
-                MenuItem("ROM", config, pickROM)
-                MenuItem("Reset", config, reset)
-                MenuItem("Theme", config, pickColor)
+                MenuItem("ROM", config, pickROM, closeMenu)
+                MenuItem("Reset", config, reset, closeMenu)
+                MenuItem("Theme", config, pickColor, closeMenu)
             }
         },
         sheetPeekHeight = peekHeight,
@@ -54,13 +61,13 @@ fun MenuBottomSheet(
 }
 
 @Composable
-fun MenuItem(label: String, config: Config,onClick: () -> Unit) {
+fun MenuItem(label: String, config: Config,onClick: () -> Unit, closeMenu: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
             .background(Color(config.colorState.value.background))
-            .clickable { onClick() }
+            .clickable { onClick(); closeMenu() }
     ) {
         Text(
             text = label,
