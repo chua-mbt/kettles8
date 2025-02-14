@@ -20,7 +20,7 @@ object Debug {
     }
 
     fun step(keyEvent: KeyEvent): Boolean {
-        val stepInput = keyEvent.type == KeyEventType.KeyUp && keyEvent.key == Key.CtrlLeft && panelVisible.value
+        val stepInput = keyEvent.type == KeyEventType.KeyUp && keyEvent.key == Key.Spacebar && panelVisible.value
         if (stepInput) { maxCycle++ }
         return stepInput
     }
