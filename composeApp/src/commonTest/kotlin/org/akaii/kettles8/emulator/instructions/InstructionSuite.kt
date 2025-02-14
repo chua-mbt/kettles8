@@ -451,7 +451,7 @@ class InstructionSuite : FunSpec({
 
         checkAll<Unit>(10) { _ ->
             val uniqueOutputs = mutableSetOf<UByte>()
-            repeat(1000){
+            repeat(1000) {
                 instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
                 uniqueOutputs.add(emulator.cpu.registers[VA])
             }
@@ -464,7 +464,7 @@ class InstructionSuite : FunSpec({
         val emulator = Emulator()
         checkAll<Unit>(100) { _ ->
             val outputs = mutableListOf<UByte>()
-            repeat(100){
+            repeat(100) {
                 instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
                 outputs.add(emulator.cpu.registers[VA])
             }
@@ -597,6 +597,37 @@ class InstructionSuite : FunSpec({
         emulator.display[0u, 0u] shouldBe UByte.MIN_VALUE
 
         emulator.cpu.registers[VF] shouldBe 1u
+
+        instruction.description() shouldEndWith "DRW_VX_VY V1, V2, 0x03"
+    }
+
+    test("DRW_VX_VY - Collision Detection") {
+        val instruction = Instruction.decode(0xD123u)
+        instruction.shouldBeTypeOf<DRW_VX_VY>()
+
+        val emulator = Emulator()
+
+        // Set up sprite in memory - only second bit is set
+        emulator.memory[0x200u] = 0b01000000u
+
+        // Pre-set a display pixel that's ON but won't actually collide
+        // (because sprite will draw to the position next to it)
+        emulator.display[5u, 10u] = UByte.MAX_VALUE
+
+        emulator.cpu.registers[V1] = 5u
+        emulator.cpu.registers[V2] = 10u
+        emulator.cpu.indexRegister = 0x200u
+
+        instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
+
+        // Should be 0 because even though we encountered an ON pixel,
+        // the sprite bit at that position was 0, so no real collision occurred
+        emulator.cpu.registers[VF] shouldBe 0u
+
+        // Original pixel should still be ON
+        emulator.display[5u, 10u] shouldBe UByte.MAX_VALUE
+        // New sprite pixel should be ON
+        emulator.display[6u, 10u] shouldBe UByte.MAX_VALUE
 
         instruction.description() shouldEndWith "DRW_VX_VY V1, V2, 0x03"
     }
