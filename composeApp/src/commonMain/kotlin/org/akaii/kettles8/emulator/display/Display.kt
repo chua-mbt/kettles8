@@ -1,6 +1,8 @@
 package org.akaii.kettles8.emulator.display
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 
 class Display {
     companion object {

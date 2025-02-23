@@ -1,17 +1,16 @@
 package org.akaii.kettles8.shaders
 
 import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Shader
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.graphics.toArgb
+import org.akaii.kettles8.Config
 import org.akaii.kettles8.emulator.display.Display
 import org.akaii.kettles8.shaders.KettlesShader.Companion.SHADER_PADDING
-import org.akaii.kettles8.ui.Config
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 interface AgslShader : KettlesShader {

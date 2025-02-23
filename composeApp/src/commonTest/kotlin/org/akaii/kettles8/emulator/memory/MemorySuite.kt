@@ -1,8 +1,9 @@
 package org.akaii.kettles8.emulator.memory
 
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.matchers.*
-import io.kotest.matchers.collections.*
+import io.kotest.matchers.collections.shouldContainOnly
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import org.akaii.kettles8.emulator.display.DefaultFont
 import kotlin.random.Random
 

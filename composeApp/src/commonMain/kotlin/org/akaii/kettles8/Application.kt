@@ -1,12 +1,11 @@
 package org.akaii.kettles8
 
-import org.akaii.kettles8.emulator.cpu.Cpu
 import org.akaii.kettles8.emulator.Emulator
 import org.akaii.kettles8.emulator.beep.Beep
+import org.akaii.kettles8.emulator.cpu.Cpu
 import org.akaii.kettles8.emulator.instructions.Instruction
 import org.akaii.kettles8.emulator.memory.Address
 import org.akaii.kettles8.emulator.memory.Registers
-import org.akaii.kettles8.ui.Config
 
 class Application(beep: Beep, val config: Config = Config()) {
     companion object {

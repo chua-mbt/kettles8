@@ -1,11 +1,13 @@
 package org.akaii.kettles8.emulator.instructions
 
 import org.akaii.kettles8.emulator.cpu.Cpu
-import org.akaii.kettles8.emulator.display.*
+import org.akaii.kettles8.emulator.display.DefaultFont
+import org.akaii.kettles8.emulator.display.Display
 import org.akaii.kettles8.emulator.format.Hex.UI16_FORMAT
 import org.akaii.kettles8.emulator.format.Hex.UI8_FORMAT
 import org.akaii.kettles8.emulator.input.Keypad
-import org.akaii.kettles8.emulator.memory.*
+import org.akaii.kettles8.emulator.memory.Address
+import org.akaii.kettles8.emulator.memory.Memory
 import org.akaii.kettles8.emulator.memory.Registers.Companion.Register
 
 /**
@@ -127,18 +129,18 @@ interface ByteMask : HasValue {
 interface Executable {
     fun description(): String = javaClass.simpleName
 
-    fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad)
+    fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean = false)
 }
 
 interface NotImplemented : Executable {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         TODO("Not implemented: ${description()}")
     }
 }
 
 /** Clear the display. */
 object CLS : Instruction(0x00E0u) {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         display.clear()
     }
 }
@@ -148,7 +150,7 @@ object CLS : Instruction(0x00E0u) {
  * The interpreter sets the program counter to the address at the top of the stack, then subtracts 1 from the stack pointer.
  */
 object RET : Instruction(0x00EEu) {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         cpu.programCounter = cpu.stack.removeLast()
     }
 }
@@ -164,7 +166,7 @@ class SYS(override val value: UShort) : Instruction(value), NotImplemented
  * The interpreter sets the program counter to nnn.
  */
 class JP(override val value: UShort) : Instruction(value), AddressMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         cpu.programCounter = target
     }
 
@@ -177,7 +179,7 @@ class JP(override val value: UShort) : Instruction(value), AddressMask {
  * The interpreter increments the stack pointer, then puts the current PC on the top of the stack. The PC is then set to nnn.
  */
 class CALL(override val value: UShort) : Instruction(value), AddressMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         cpu.stack.addLast(cpu.programCounter)
         cpu.programCounter = address(value)
     }
@@ -191,7 +193,7 @@ class CALL(override val value: UShort) : Instruction(value), AddressMask {
  * The interpreter compares register Vx to kk, and if they are equal, increments the program counter by 2.
  */
 class SE_VX_BYTE(override val value: UShort) : Instruction(value), VXMask, ByteMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         if (cpu.registers[vX] == byteC) {
             cpu.advanceProgram()
         }
@@ -206,7 +208,7 @@ class SE_VX_BYTE(override val value: UShort) : Instruction(value), VXMask, ByteM
  * The interpreter compares register Vx to kk, and if they are not equal, increments the program counter by 2.
  */
 class SNE_VX_BYTE(override val value: UShort) : Instruction(value), VXMask, ByteMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         if (cpu.registers[vX] != byteC) {
             cpu.advanceProgram()
         }
@@ -221,7 +223,7 @@ class SNE_VX_BYTE(override val value: UShort) : Instruction(value), VXMask, Byte
  * The interpreter compares register Vx to register Vy, and if they are equal, increments the program counter by 2.
  */
 class SE_VX_VY(override val value: UShort) : Instruction(value), VXMask, VYMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         if (cpu.registers[vX] == cpu.registers[vY]) {
             cpu.advanceProgram()
         }
@@ -236,7 +238,7 @@ class SE_VX_VY(override val value: UShort) : Instruction(value), VXMask, VYMask 
  * The interpreter puts the value kk into register Vx.
  */
 class LD_VX_BYTE(override val value: UShort) : Instruction(value), VXMask, ByteMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         cpu.registers[vX] = byteC
     }
 
@@ -249,7 +251,7 @@ class LD_VX_BYTE(override val value: UShort) : Instruction(value), VXMask, ByteM
  * Adds the value kk to the value of register Vx, then stores the result in Vx.
  */
 class ADD_VX_BYTE(override val value: UShort) : Instruction(value), VXMask, ByteMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         cpu.registers[vX] = (cpu.registers[vX] + byteC).toUByte()
     }
 
@@ -262,7 +264,7 @@ class ADD_VX_BYTE(override val value: UShort) : Instruction(value), VXMask, Byte
  * Stores the value of register Vy in register Vx.
  */
 class LD_VX_VY(override val value: UShort) : Instruction(value), VXMask, VYMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         cpu.registers[vX] = cpu.registers[vY]
     }
 
@@ -277,8 +279,11 @@ class LD_VX_VY(override val value: UShort) : Instruction(value), VXMask, VYMask 
  * then the same bit in the result is also 1. Otherwise, it is 0.
  */
 class OR_VX_VY(override val value: UShort) : Instruction(value), VXMask, VYMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
-        cpu.registers[vx(value)] = cpu.registers[vx(value)] or cpu.registers[vy(value)]
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
+        if (maxQuirkCompatibility) {
+            cpu.registers[Register.VF] = 0u
+        }
+        cpu.registers[vX] = cpu.registers[vX] or cpu.registers[vY]
     }
 
     override fun description(): String =
@@ -292,7 +297,10 @@ class OR_VX_VY(override val value: UShort) : Instruction(value), VXMask, VYMask 
  * then the same bit in the result is also 1. Otherwise, it is 0.
  */
 class AND_VX_VY(override val value: UShort) : Instruction(value), VXMask, VYMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
+        if (maxQuirkCompatibility) {
+            cpu.registers[Register.VF] = 0u
+        }
         cpu.registers[vX] = cpu.registers[vX] and cpu.registers[vY]
     }
 
@@ -307,7 +315,10 @@ class AND_VX_VY(override val value: UShort) : Instruction(value), VXMask, VYMask
  * the corresponding bit in the result is set to 1. Otherwise, it is 0.
  */
 class XOR_VX_VY(override val value: UShort) : Instruction(value), VXMask, VYMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
+        if (maxQuirkCompatibility) {
+            cpu.registers[Register.VF] = 0u
+        }
         cpu.registers[vX] = cpu.registers[vX] xor cpu.registers[vY]
     }
 
@@ -321,7 +332,7 @@ class XOR_VX_VY(override val value: UShort) : Instruction(value), VXMask, VYMask
  * Only the lowest 8 bits of the result are kept, and stored in Vx.
  */
 class ADD_VX_VY(override val value: UShort) : Instruction(value), VXMask, VYMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         val sum = cpu.registers[vX] + cpu.registers[vY]
         if (sum > 255u) {
             cpu.registers[Register.VF] = 1u
@@ -340,7 +351,7 @@ class ADD_VX_VY(override val value: UShort) : Instruction(value), VXMask, VYMask
  * If Vx > Vy, then VF is set to 1, otherwise 0. Then Vy is subtracted from Vx, and the results stored in Vx.
  */
 class SUB_VX_VY(override val value: UShort) : Instruction(value), VXMask, VYMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         if (cpu.registers[vX] > cpu.registers[vY]) {
             cpu.registers[Register.VF] = 1u
         } else {
@@ -357,10 +368,14 @@ class SUB_VX_VY(override val value: UShort) : Instruction(value), VXMask, VYMask
  * Set Vx = Vx SHR 1.
  * If the least-significant bit of Vx is 1, then VF is set to 1, otherwise 0. Then Vx is divided by 2.
  */
-class SHR_VX(override val value: UShort) : Instruction(value), VXMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+class SHR_VX(override val value: UShort) : Instruction(value), VXMask, VYMask {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
+        if (maxQuirkCompatibility) {
+            cpu.registers[vX] = cpu.registers[vY]
+        }
         cpu.registers[Register.VF] = (cpu.registers[vX] and 0x1u)
         cpu.registers[vX] = (cpu.registers[vX].toUInt() shr 1).toUByte()
+
     }
 
     override fun description(): String =
@@ -372,7 +387,7 @@ class SHR_VX(override val value: UShort) : Instruction(value), VXMask {
  * If Vy > Vx, then VF is set to 1, otherwise 0. Then Vx is subtracted from Vy, and the results stored in Vx.
  */
 class SUBN_VX_VY(override val value: UShort) : Instruction(value), VXMask, VYMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         if (cpu.registers[vY] > cpu.registers[vX]) {
             cpu.registers[Register.VF] = 1u
         } else {
@@ -389,9 +404,11 @@ class SUBN_VX_VY(override val value: UShort) : Instruction(value), VXMask, VYMas
  * Set Vx = Vx SHL 1.
  * If the most-significant bit of Vx is 1, then VF is set to 1, otherwise to 0. Then Vx is multiplied by 2.
  */
-class SHL_VX(override val value: UShort) : Instruction(value), VXMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
-        val vX = vx(value)
+class SHL_VX(override val value: UShort) : Instruction(value), VXMask, VYMask {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
+        if (maxQuirkCompatibility) {
+            cpu.registers[vX] = cpu.registers[vY]
+        }
         val carry = (cpu.registers[vX] and 0x80u).toUInt() shr 7
         cpu.registers[Register.VF] = carry.toUByte()
         cpu.registers[vX] = (cpu.registers[vX].toUInt() shl 1).toUByte()
@@ -406,7 +423,7 @@ class SHL_VX(override val value: UShort) : Instruction(value), VXMask {
  * The values of Vx and Vy are compared, and if they are not equal, the program counter is increased by 2.
  */
 class SNE_VX_VY(override val value: UShort) : Instruction(value), VXMask, VYMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         if (cpu.registers[vX] != cpu.registers[vY]) {
             cpu.advanceProgram()
         }
@@ -421,7 +438,7 @@ class SNE_VX_VY(override val value: UShort) : Instruction(value), VXMask, VYMask
  * The value of register I is set to nnn.
  */
 class LD_I(override val value: UShort) : Instruction(value), AddressMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         cpu.indexRegister = target
     }
 
@@ -433,8 +450,8 @@ class LD_I(override val value: UShort) : Instruction(value), AddressMask {
  * Jump to location nnn + V0.
  * The program counter is set to nnn plus the value of V0.
  */
-class JP_V0(override val value: UShort) : Instruction(value), AddressMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+class JP_V0(override val value: UShort) : Instruction(value), AddressMask, VXMask {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         cpu.programCounter = (target + cpu.registers[Register.V0]).toUShort()
     }
 
@@ -450,7 +467,7 @@ class JP_V0(override val value: UShort) : Instruction(value), AddressMask {
 class RND_VX(override val value: UShort) : Instruction(value), VXMask, ByteMask {
     val randomRange = 0..255
 
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         cpu.registers[vX] = (byteC and randomRange.random().toUByte())
     }
 
@@ -469,18 +486,29 @@ class RND_VX(override val value: UShort) : Instruction(value), VXMask, ByteMask 
 class DRW_VX_VY(override val value: UShort) : Instruction(value), VXMask, VYMask, NMask {
     fun screenWrap(coordinate: UInt, border: Int): UInt = coordinate.mod(border.toUInt())
 
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         val startX = cpu.registers[vX]
         val startY = cpu.registers[vY]
         val memStart = cpu.indexRegister.toUInt()
         val memEnd = memStart + nC
         var collision = false
+        val spriteIsBelowScreen = startY >= Display.DISPLAY_HEIGHT.toUInt()
+        val spriteIsBeyondScreen = startX >= Display.DISPLAY_WIDTH.toUInt()
+
         for (spriteByteAddress in memStart..<memEnd) {
-            val offSetY = spriteByteAddress - memStart
-            val displayY = screenWrap(startY + offSetY, Display.DISPLAY_HEIGHT)
+            val offsetY = spriteByteAddress - memStart
+            val absoluteDisplayY = startY + offsetY
+            val pixelIsBelowScreen = absoluteDisplayY >= Display.DISPLAY_HEIGHT.toUInt()
+            if (!spriteIsBelowScreen && maxQuirkCompatibility && pixelIsBelowScreen) continue // clip
+
+            val displayY = screenWrap(absoluteDisplayY, Display.DISPLAY_HEIGHT)
             val spriteByte = memory[spriteByteAddress]
             for (offsetX in 0..<8) {
-                val displayX = screenWrap(startX + offsetX.toUInt(), Display.DISPLAY_WIDTH)
+                val absoluteDisplayX = startX + offsetX.toUInt()
+                val pixelIsBeyondScreen = absoluteDisplayX >= Display.DISPLAY_WIDTH.toUInt()
+                if (!spriteIsBeyondScreen && maxQuirkCompatibility && pixelIsBeyondScreen) continue // clip
+
+                val displayX = screenWrap(absoluteDisplayX, Display.DISPLAY_WIDTH)
                 val spriteBit = Display.normalize(spriteByte and (0x80u shr offsetX).toUByte())
                 val displayPixel = display[displayX.toUByte(), displayY.toUByte()]
                 display[displayX.toUByte(), displayY.toUByte()] = displayPixel xor spriteBit
@@ -501,7 +529,7 @@ class DRW_VX_VY(override val value: UShort) : Instruction(value), VXMask, VYMask
  * Checks the keyboard, and if the key corresponding to the value of Vx is currently in the down position, PC is increased by 2.
  */
 class SKP_VX(override val value: UShort) : Instruction(value), VXMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         if (keypad[cpu.registers[vX]]) {
             cpu.advanceProgram()
         }
@@ -516,7 +544,7 @@ class SKP_VX(override val value: UShort) : Instruction(value), VXMask {
  * Checks the keyboard, and if the key corresponding to the value of Vx is currently in the up position, PC is increased by 2.
  */
 class SKNP_VX(override val value: UShort) : Instruction(value), VXMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         if (!keypad[cpu.registers[vX]]) {
             cpu.advanceProgram()
         }
@@ -531,7 +559,7 @@ class SKNP_VX(override val value: UShort) : Instruction(value), VXMask {
  * The value of DT is placed into Vx.
  */
 class LD_VX_DT(override val value: UShort) : Instruction(value), VXMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         cpu.registers[vX] = cpu.delayTimer
     }
 
@@ -544,7 +572,7 @@ class LD_VX_DT(override val value: UShort) : Instruction(value), VXMask {
  * All execution stops until a key is pressed, then the value of that key is stored in Vx.
  */
 class LD_VX_K(override val value: UShort) : Instruction(value), VXMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         keypad.futureInput.onNextKeyReady { cpu.registers[vX] = it.value }
     }
 
@@ -557,7 +585,7 @@ class LD_VX_K(override val value: UShort) : Instruction(value), VXMask {
  * DT is set equal to the value of Vx.
  */
 class LD_DT_VX(override val value: UShort) : Instruction(value), VXMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         cpu.delayTimer = cpu.registers[vX]
     }
 
@@ -570,7 +598,7 @@ class LD_DT_VX(override val value: UShort) : Instruction(value), VXMask {
  * ST is set equal to the value of Vx.
  */
 class LD_ST_VX(override val value: UShort) : Instruction(value), VXMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         cpu.soundTimer = cpu.registers[vX]
     }
 
@@ -583,7 +611,7 @@ class LD_ST_VX(override val value: UShort) : Instruction(value), VXMask {
  * The values of I and Vx are added, and the results are stored in location I.
  */
 class ADD_I_VX(override val value: UShort) : Instruction(value), VXMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         cpu.indexRegister = (cpu.indexRegister + cpu.registers[vX]).toUShort()
     }
 
@@ -596,7 +624,7 @@ class ADD_I_VX(override val value: UShort) : Instruction(value), VXMask {
  * The value of I is set to the location for the hexadecimal sprite corresponding to the value of Vx.
  */
 class LD_F_VX(override val value: UShort) : Instruction(value), VXMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         cpu.indexRegister = (Address.FONT_START + cpu.registers[vX] * DefaultFont.BYTE_SIZE).toUShort()
     }
 
@@ -610,7 +638,7 @@ class LD_F_VX(override val value: UShort) : Instruction(value), VXMask {
  * the tens digit at location I+1, and the ones digit at location I+2.
  */
 class LD_B_VX(override val value: UShort) : Instruction(value), VXMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         val vxContents = cpu.registers[vX]
         memory[cpu.indexRegister + 2u] = (vxContents.mod(10u)).toUByte()
         memory[cpu.indexRegister + 1u] = (vxContents.div(10u).mod(10u)).toUByte()
@@ -626,11 +654,15 @@ class LD_B_VX(override val value: UShort) : Instruction(value), VXMask {
  * The interpreter copies the values of registers V0 through Vx into memory, starting at the address in location I.
  */
 class LD_I_VX(override val value: UShort) : Instruction(value), VXMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         val registersToVX = Register.V0..vX
+        val originalIndex = cpu.indexRegister
         for (register in registersToVX) {
-            val memoryAddress = cpu.indexRegister + register.value.toUShort()
+            val memoryAddress = originalIndex + register.value.toUShort()
             memory[memoryAddress] = cpu.registers[register]
+            if (maxQuirkCompatibility) {
+                cpu.indexRegister++
+            }
         }
     }
 
@@ -643,11 +675,15 @@ class LD_I_VX(override val value: UShort) : Instruction(value), VXMask {
  * The interpreter reads values from memory starting at location I into registers V0 through Vx.
  */
 class LD_VX_I(override val value: UShort) : Instruction(value), VXMask {
-    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad) {
+    override fun execute(cpu: Cpu, memory: Memory, display: Display, keypad: Keypad, maxQuirkCompatibility: Boolean) {
         val registersToVX = Register.V0..vX
+        val originalIndex = cpu.indexRegister
         for (register in registersToVX) {
-            val memoryAddress = cpu.indexRegister + register.value.toUShort()
+            val memoryAddress = originalIndex + register.value.toUShort()
             cpu.registers[register] = memory[memoryAddress]
+            if (maxQuirkCompatibility) {
+                cpu.indexRegister++
+            }
         }
     }
 

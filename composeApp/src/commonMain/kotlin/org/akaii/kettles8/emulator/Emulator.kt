@@ -36,6 +36,11 @@ class Emulator(
         if(memory.isInitialized()) cpu.running = true
     }
 
+    override fun toggleMaxQuirkCompatibility(enabled: Boolean) {
+        interpreter.toggleMaxQuirkCompatibility(enabled)
+        reset()
+    }
+
     override fun cleanup() {
         interpreter.cleanup()
         cpu.cleanup()

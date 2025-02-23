@@ -1,7 +1,6 @@
 package org.akaii.kettles8.emulator.memory
 
-import org.akaii.kettles8.emulator.format.Hex
-import java.util.Locale
+import java.util.*
 
 class Registers {
 

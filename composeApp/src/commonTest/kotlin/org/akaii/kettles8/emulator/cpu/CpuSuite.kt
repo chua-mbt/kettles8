@@ -1,7 +1,7 @@
 package org.akaii.kettles8.emulator.cpu
 
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.matchers.*
+import io.kotest.matchers.shouldBe
 import org.akaii.kettles8.emulator.beep.Beep
 
 class CpuSuite : FunSpec({

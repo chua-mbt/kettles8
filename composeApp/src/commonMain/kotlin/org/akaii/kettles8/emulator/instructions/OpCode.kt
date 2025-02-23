@@ -1,8 +1,5 @@
 package org.akaii.kettles8.emulator.instructions
 
-import org.akaii.kettles8.emulator.instructions.OpCode.entries
-
-
 /**
  * Represents an opcode pattern in the CHIP-8 instruction set.
  *

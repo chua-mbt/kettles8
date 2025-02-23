@@ -10,7 +10,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -22,7 +23,10 @@ import org.akaii.kettles8.beep.AndroidBeep
 import org.akaii.kettles8.emulator.display.Display
 import org.akaii.kettles8.rom.AndroidROM
 import org.akaii.kettles8.shaders.CrtAgsl
-import org.akaii.kettles8.ui.*
+import org.akaii.kettles8.ui.DisplayPanel
+import org.akaii.kettles8.ui.KeyPanel
+import org.akaii.kettles8.ui.MenuBottomSheet
+import org.akaii.kettles8.ui.ThemePicker
 
 class MainActivity : ComponentActivity() {
     private val app = Application(beep = AndroidBeep())
@@ -54,6 +58,11 @@ class MainActivity : ComponentActivity() {
                         config = app.config,
                         pickROM = { pickROM.launch(arrayOf("*/*")) },
                         reset = { app.emulator.reset() },
+                        toggleQuirkCompat = {
+                            val newState = !app.config.getMaxQuirkCompatibility()
+                            app.config.setMaxQuirkCompatibility(newState)
+                            app.emulator.toggleMaxQuirkCompatibility(newState)
+                       },
                         pickColor = { showThemePicker.value = true }
                     ) { padding ->
                         Box(

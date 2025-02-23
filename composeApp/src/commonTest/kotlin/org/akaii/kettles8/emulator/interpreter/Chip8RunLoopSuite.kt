@@ -1,9 +1,9 @@
 package org.akaii.kettles8.emulator.interpreter
 
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.matchers.*
-import io.kotest.matchers.collections.*
+import io.kotest.matchers.collections.shouldContainOnly
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import org.akaii.kettles8.emulator.Emulator
 import org.akaii.kettles8.emulator.beep.Beep
 import org.akaii.kettles8.emulator.cpu.Cpu

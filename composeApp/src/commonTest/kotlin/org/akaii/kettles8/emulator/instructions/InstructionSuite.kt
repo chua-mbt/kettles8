@@ -8,6 +8,7 @@ import io.kotest.matchers.string.*
 import io.kotest.matchers.types.*
 import io.kotest.property.checkAll
 import org.akaii.kettles8.emulator.Emulator
+import org.akaii.kettles8.emulator.display.Display
 import org.akaii.kettles8.emulator.input.Keypad.Companion.Key
 import org.akaii.kettles8.emulator.memory.*
 import org.akaii.kettles8.emulator.memory.Registers.Companion.Register
@@ -248,6 +249,28 @@ class InstructionSuite : FunSpec({
         instruction.description() shouldEndWith "OR_VX_VY VA, VB"
     }
 
+    test("OR_VX_VY - Max Quirk Compatibility") {
+        val instruction = Instruction.decode(0x8AB1u)
+        instruction.shouldBeTypeOf<OR_VX_VY>()
+        instruction.vx(instruction.value) shouldBe VA
+        instruction.vy(instruction.value) shouldBe VB
+
+        val emulator = Emulator()
+        emulator.cpu.registers[VA] = 0b1010u
+        emulator.cpu.registers[VB] = 0b1100u
+        instruction.execute(
+            emulator.cpu,
+            emulator.memory,
+            emulator.display,
+            emulator.keypad,
+            maxQuirkCompatibility = true
+        )
+        emulator.cpu.registers[VA] shouldBe 0b1110u
+        emulator.cpu.registers[VF] shouldBe 0u
+
+        instruction.description() shouldEndWith "OR_VX_VY VA, VB"
+    }
+
     test("AND_VX_VY") {
         val instruction = Instruction.decode(0x8AB2u)
         instruction.shouldBeTypeOf<AND_VX_VY>()
@@ -263,6 +286,28 @@ class InstructionSuite : FunSpec({
         instruction.description() shouldEndWith "AND_VX_VY VA, VB"
     }
 
+    test("AND_VX_VY - Max Quirk Compatibility") {
+        val instruction = Instruction.decode(0x8AB2u)
+        instruction.shouldBeTypeOf<AND_VX_VY>()
+        instruction.vx(instruction.value) shouldBe VA
+        instruction.vy(instruction.value) shouldBe VB
+
+        val emulator = Emulator()
+        emulator.cpu.registers[VA] = 0b1010u
+        emulator.cpu.registers[VB] = 0b1100u
+        instruction.execute(
+            emulator.cpu,
+            emulator.memory,
+            emulator.display,
+            emulator.keypad,
+            maxQuirkCompatibility = true
+        )
+        emulator.cpu.registers[VA] shouldBe 0b1000u
+        emulator.cpu.registers[VF] shouldBe 0u
+
+        instruction.description() shouldEndWith "AND_VX_VY VA, VB"
+    }
+
     test("XOR_VX_VY") {
         val instruction = Instruction.decode(0x8AB3u)
         instruction.shouldBeTypeOf<XOR_VX_VY>()
@@ -274,6 +319,28 @@ class InstructionSuite : FunSpec({
         emulator.cpu.registers[VB] = 0b1100u
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.registers[VA] shouldBe 0b0110u
+
+        instruction.description() shouldEndWith "XOR_VX_VY VA, VB"
+    }
+
+    test("XOR_VX_VY - Max Quirk Compatibility") {
+        val instruction = Instruction.decode(0x8AB3u)
+        instruction.shouldBeTypeOf<XOR_VX_VY>()
+        instruction.vx(instruction.value) shouldBe VA
+        instruction.vy(instruction.value) shouldBe VB
+
+        val emulator = Emulator()
+        emulator.cpu.registers[VA] = 0b1010u
+        emulator.cpu.registers[VB] = 0b1100u
+        instruction.execute(
+            emulator.cpu,
+            emulator.memory,
+            emulator.display,
+            emulator.keypad,
+            maxQuirkCompatibility = true
+        )
+        emulator.cpu.registers[VA] shouldBe 0b0110u
+        emulator.cpu.registers[VF] shouldBe 0u
 
         instruction.description() shouldEndWith "XOR_VX_VY VA, VB"
     }
@@ -341,6 +408,26 @@ class InstructionSuite : FunSpec({
         instruction.description() shouldEndWith "SHR_VX VA"
     }
 
+    test("SHR_VX - Max Quirk Compatibility") {
+        val instruction = Instruction.decode(0x8AB6u)
+        instruction.shouldBeTypeOf<SHR_VX>()
+        instruction.vx(instruction.value) shouldBe VA
+
+        val emulator = Emulator()
+        emulator.cpu.registers[VB] = 0b1010u
+        instruction.execute(
+            emulator.cpu,
+            emulator.memory,
+            emulator.display,
+            emulator.keypad,
+            maxQuirkCompatibility = true
+        )
+        emulator.cpu.registers[VA] shouldBe 0b0101u
+        emulator.cpu.registers[VF] shouldBe 0u
+
+        instruction.description() shouldEndWith "SHR_VX VA"
+    }
+
     test("SUBN_VX_VY") {
         val instruction = Instruction.decode(0x8AB7u)
         instruction.shouldBeTypeOf<SUBN_VX_VY>()
@@ -378,6 +465,26 @@ class InstructionSuite : FunSpec({
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.registers[VA] shouldBe 0b01000000u
         emulator.cpu.registers[VF] shouldBe 1u // Carry from MSB
+
+        instruction.description() shouldEndWith "SHL_VX VA"
+    }
+
+    test("SHL_VX - Max Quirk Compatibility") {
+        val instruction = Instruction.decode(0x8ABEu)
+        instruction.shouldBeTypeOf<SHL_VX>()
+        instruction.vx(instruction.value) shouldBe VA
+
+        val emulator = Emulator()
+        emulator.cpu.registers[VB] = 0b01010000u
+        instruction.execute(
+            emulator.cpu,
+            emulator.memory,
+            emulator.display,
+            emulator.keypad,
+            maxQuirkCompatibility = true
+        )
+        emulator.cpu.registers[VA] shouldBe 0b10100000u
+        emulator.cpu.registers[VF] shouldBe 0u
 
         instruction.description() shouldEndWith "SHL_VX VA"
     }
@@ -424,10 +531,11 @@ class InstructionSuite : FunSpec({
 
         val emulator = Emulator()
         emulator.cpu.registers[V0] = 0x01u
+        emulator.cpu.registers[VB] = 0x02u
         emulator.cpu.programCounter shouldBe Address.ROM_START
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
-        emulator.cpu.programCounter shouldBe 0x0BCEu // 0xBCDu + 0x001u
 
+        emulator.cpu.programCounter shouldBe 0x0BCEu // 0xBCDu + V0(0x001u)
         instruction.description() shouldEndWith "JP_V0 0x0BCD"
     }
 
@@ -632,6 +740,89 @@ class InstructionSuite : FunSpec({
         instruction.description() shouldEndWith "DRW_VX_VY V1, V2, 0x03"
     }
 
+    test("DRW_VX_VY - Wrapping with Max Quirk Compatibilitys") {
+        val instruction = Instruction.decode(0xD123u)
+        instruction.shouldBeTypeOf<DRW_VX_VY>()
+
+        val emulator = Emulator()
+
+        emulator.memory[0x200u] = 0b11100000u
+        emulator.memory[0x201u] = 0b10100000u
+        emulator.memory[0x202u] = 0b11100000u
+
+        emulator.cpu.registers[V1] = 120u  // x position well beyond screen
+        emulator.cpu.registers[V2] = 60u   // y position well beyond screen
+        emulator.cpu.indexRegister = 0x200u
+
+        instruction.execute(
+            emulator.cpu,
+            emulator.memory,
+            emulator.display,
+            emulator.keypad,
+            maxQuirkCompatibility = true
+        )
+
+        val wrappedX: (UInt) -> UByte = { x: UInt -> (x % Display.DISPLAY_WIDTH.toUInt()).toUByte() }
+        val wrappedY: (UInt) -> UByte = { y: UInt -> (y % Display.DISPLAY_HEIGHT.toUInt()).toUByte() }
+
+        emulator.display[wrappedX(120u), wrappedY(60u)] shouldBe UByte.MAX_VALUE
+        emulator.display[wrappedX(120u), wrappedY(61u)] shouldBe UByte.MAX_VALUE
+        emulator.display[wrappedX(120u), wrappedY(62u)] shouldBe UByte.MAX_VALUE
+        emulator.display[wrappedX(121u), wrappedY(60u)] shouldBe UByte.MAX_VALUE
+        emulator.display[wrappedX(121u), wrappedY(61u)] shouldBe UByte.MIN_VALUE
+        emulator.display[wrappedX(121u), wrappedY(62u)] shouldBe UByte.MAX_VALUE
+        emulator.display[wrappedX(122u), wrappedY(60u)] shouldBe UByte.MAX_VALUE
+        emulator.display[wrappedX(122u), wrappedY(61u)] shouldBe UByte.MAX_VALUE
+        emulator.display[wrappedX(122u), wrappedY(62u)] shouldBe UByte.MAX_VALUE
+
+        emulator.cpu.registers[VF] shouldBe 0u
+
+        instruction.description() shouldEndWith "DRW_VX_VY V1, V2, 0x03"
+    }
+
+    test("DRW_VX_VY - Clipping with Max Quirk Compatibilitys") {
+        val instruction = Instruction.decode(0xD123u)
+        instruction.shouldBeTypeOf<DRW_VX_VY>()
+
+        val emulator = Emulator()
+
+        emulator.memory[0x200u] = 0b11100000u
+        emulator.memory[0x201u] = 0b10100000u
+        emulator.memory[0x202u] = 0b11100000u
+
+        emulator.cpu.registers[V1] = 62u  // x position partially beyond screen
+        emulator.cpu.registers[V2] = 30u  // y position partially beyond screen
+        emulator.cpu.indexRegister = 0x200u
+
+        instruction.execute(
+            emulator.cpu,
+            emulator.memory,
+            emulator.display,
+            emulator.keypad,
+            maxQuirkCompatibility = true
+        )
+
+        val wrappedX: (UInt) -> UByte = { x: UInt -> (x % Display.DISPLAY_WIDTH.toUInt()).toUByte() }
+        val wrappedY: (UInt) -> UByte = { y: UInt -> (y % Display.DISPLAY_HEIGHT.toUInt()).toUByte() }
+
+        // Wrapped
+        emulator.display[wrappedX(62u), wrappedY(30u)] shouldBe UByte.MAX_VALUE
+        emulator.display[wrappedX(62u), wrappedY(31u)] shouldBe UByte.MAX_VALUE
+        emulator.display[wrappedX(63u), wrappedY(30u)] shouldBe UByte.MAX_VALUE
+        emulator.display[wrappedX(63u), wrappedY(31u)] shouldBe UByte.MIN_VALUE
+
+        // Clipped
+        emulator.display[wrappedX(62u), wrappedY(32u)] shouldBe UByte.MIN_VALUE
+        emulator.display[wrappedX(63u), wrappedY(32u)] shouldBe UByte.MIN_VALUE
+        emulator.display[wrappedX(64u), wrappedY(30u)] shouldBe UByte.MIN_VALUE
+        emulator.display[wrappedX(64u), wrappedY(31u)] shouldBe UByte.MIN_VALUE
+        emulator.display[wrappedX(64u), wrappedY(32u)] shouldBe UByte.MIN_VALUE
+
+        emulator.cpu.registers[VF] shouldBe 0u
+
+        instruction.description() shouldEndWith "DRW_VX_VY V1, V2, 0x03"
+    }
+
     test("SKP_VX") {
         val instruction = Instruction.decode(0xEA9Eu)
         instruction.shouldBeTypeOf<SKP_VX>()
@@ -809,6 +1000,32 @@ class InstructionSuite : FunSpec({
         instruction.description() shouldEndWith "LD_I_VX VA"
     }
 
+    test("LD_I_VX - Max Quirk Compatibility") {
+        val instruction = Instruction.decode(0xFA55u)
+        instruction.shouldBeTypeOf<LD_I_VX>()
+        instruction.vx(instruction.value) shouldBe VA
+
+        val emulator = Emulator()
+        for (vx in V0..VA) {
+            emulator.cpu.registers[vx] = vx.value.toUByte()
+        }
+        emulator.cpu.indexRegister = 0x000Au
+        emulator.memory.slice(10..25) shouldContainOnly (listOf(0u))
+        instruction.execute(
+            emulator.cpu,
+            emulator.memory,
+            emulator.display,
+            emulator.keypad,
+            maxQuirkCompatibility = true
+        )
+        emulator.memory.slice(10..25) shouldBe emulator.cpu.registers.toList().toUByteArray()
+
+        val expectedIndex = 0x000Au + 11u // 0x000Au + 10 registers + 1
+        emulator.cpu.indexRegister shouldBe expectedIndex.toUShort()
+
+        instruction.description() shouldEndWith "LD_I_VX VA"
+    }
+
     test("LD_VX_I") {
         val instruction = Instruction.decode(0xFA65u)
         instruction.shouldBeTypeOf<LD_VX_I>()
@@ -822,6 +1039,32 @@ class InstructionSuite : FunSpec({
         emulator.cpu.registers.toList() shouldContainOnly (listOf(0u))
         instruction.execute(emulator.cpu, emulator.memory, emulator.display, emulator.keypad)
         emulator.cpu.registers.toList().toUByteArray() shouldBe emulator.memory.slice(511..526)
+
+        instruction.description() shouldEndWith "LD_VX_I VA"
+    }
+
+    test("LD_VX_I - Max Quirk Compatibility") {
+        val instruction = Instruction.decode(0xFA65u)
+        instruction.shouldBeTypeOf<LD_VX_I>()
+        instruction.vx(instruction.value) shouldBe VA
+
+        val emulator = Emulator()
+        for (vx in V0..VA) {
+            emulator.memory[511u + vx.value.toUInt()] = vx.value.toUByte()
+        }
+        emulator.cpu.indexRegister = 0x01FFu // 511 in hex
+        emulator.cpu.registers.toList() shouldContainOnly (listOf(0u))
+        instruction.execute(
+            emulator.cpu,
+            emulator.memory,
+            emulator.display,
+            emulator.keypad,
+            maxQuirkCompatibility = true
+        )
+        emulator.cpu.registers.toList().toUByteArray() shouldBe emulator.memory.slice(511..526)
+
+        val expectedIndex = 0x01FFu + 11u // 0x01FFu + 10 registers + 1
+        emulator.cpu.indexRegister shouldBe expectedIndex.toUShort()
 
         instruction.description() shouldEndWith "LD_VX_I VA"
     }

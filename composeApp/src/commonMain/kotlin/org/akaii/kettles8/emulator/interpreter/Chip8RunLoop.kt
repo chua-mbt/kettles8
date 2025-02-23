@@ -23,12 +23,13 @@ class Chip8RunLoop : Interpreter {
 
     private val executor = Executors.newSingleThreadScheduledExecutor()
     private val logger = KotlinLogging.logger {}
+    private var maxQuirkCompatibility: Boolean = false
 
     override fun start(
         cpu: Cpu,
         memory: Memory,
         display: Display,
-        keypad: Keypad
+        keypad: Keypad,
     ) {
         executor.scheduleAtFixedRate(
             Runnable(cpu::updateTimers), 0, TIMER_TICKS_IN_MICROSECOND,
@@ -55,7 +56,7 @@ class Chip8RunLoop : Interpreter {
                 val instruction = fetchInstruction(cpu, memory)
                 logger.debug { instruction.description() }
                 cpu.advanceProgram()
-                instruction.execute(cpu, memory, display, keypad)
+                instruction.execute(cpu, memory, display, keypad, maxQuirkCompatibility)
                 cpu.instruction = instruction
                 keypad.clearPrevious()
             }
@@ -64,6 +65,10 @@ class Chip8RunLoop : Interpreter {
 
     override fun cleanup() {
         executor.shutdownNow()
+    }
+
+    override fun toggleMaxQuirkCompatibility(enabled: Boolean) {
+        maxQuirkCompatibility = enabled
     }
 
     fun fetchInstruction(cpu: Cpu, memory: Memory): Instruction =

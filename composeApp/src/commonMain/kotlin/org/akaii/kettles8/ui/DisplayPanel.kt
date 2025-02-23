@@ -9,6 +9,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import org.akaii.kettles8.Config
 import org.akaii.kettles8.emulator.display.Display
 import org.akaii.kettles8.emulator.display.Display.Companion.DISPLAY_HEIGHT
 import org.akaii.kettles8.emulator.display.Display.Companion.DISPLAY_WIDTH

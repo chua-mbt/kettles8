@@ -2,9 +2,9 @@ package org.akaii.kettles8.shaders
 
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.nativeCanvas
+import org.akaii.kettles8.Config
 import org.akaii.kettles8.emulator.display.Display
 import org.akaii.kettles8.shaders.KettlesShader.Companion.SHADER_PADDING
-import org.akaii.kettles8.ui.Config
 import org.jetbrains.skia.*
 
 interface SkslShader : KettlesShader {

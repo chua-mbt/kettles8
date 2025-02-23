@@ -12,14 +12,23 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.*
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.input.key.*
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.*
+import androidx.compose.ui.window.MenuBar
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.github.vinceglb.filekit.core.*
+import io.github.vinceglb.filekit.core.FileKit
+import io.github.vinceglb.filekit.core.PickerMode
+import io.github.vinceglb.filekit.core.PickerType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,7 +38,10 @@ import org.akaii.kettles8.emulator.input.Keypad
 import org.akaii.kettles8.rom.DesktopROM
 import org.akaii.kettles8.shaders.CrtSksl
 import org.akaii.kettles8.shaders.KettlesShader
-import org.akaii.kettles8.ui.*
+import org.akaii.kettles8.ui.ColorSet
+import org.akaii.kettles8.ui.DebugPanel
+import org.akaii.kettles8.ui.DisplayPanel
+import org.akaii.kettles8.ui.KeyPanel
 import kotlin.io.path.Path
 
 fun main() = DesktopApp().start()
@@ -64,6 +76,17 @@ class DesktopApp {
                         Item("Reset") {
                             app.emulator.reset()
                         }
+
+                        val maxQuirkCompatibility: State<Boolean> = remember { app.config.maxQuirkCompatibilityState }
+                        Item(
+                            text = "Max Quirk Compatibility",
+                            onClick = {
+                                val newState = !maxQuirkCompatibility.value
+                                app.config.setMaxQuirkCompatibility(newState)
+                                app.emulator.toggleMaxQuirkCompatibility(newState)
+                            },
+                            icon = if (maxQuirkCompatibility.value) rememberVectorPainter(Icons.Default.Check) else null,
+                        )
                     }
                     Menu("Keypad", mnemonic = 'K') {
                         val selected: State<Keypad.Companion.KeyConfig> = remember { app.config.keyConfigState }
